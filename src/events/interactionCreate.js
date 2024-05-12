@@ -26,8 +26,8 @@ module.exports = {
                 stringId = stringId.replace("denied - ", "");
 
                 var member = await client.users.fetch(stringId);
-                await member.send(`🌍 Your guarding log that you requested has been DENIED.`).catch(err => {});
-                await interaction.reply({ content: `🌍 I have notified the member that their report is denied.`, ephemeral: true });
+                await member.send(`❌ Your guarding log that you requested has been DENIED.`).catch(err => {});
+                await interaction.reply({ content: `🌍 I have notified the member that their guard log is denied.`, ephemeral: true });
                 await interaction.message.delete().catch(err => {});
             }
         }
@@ -37,8 +37,8 @@ module.exports = {
                 stringId = stringId.replace("approved - ", "");
 
                 var member = await client.users.fetch(stringId);
-                await member.send(`🌍 Your guarding log that you requested has been APPROVED.`).catch(err => {});
-                await interaction.reply({ content: `🌍 I have notified the member that their report is approved.`, ephemeral: true });
+                await member.send(`✅ Your guarding log that you requested has been APPROVED.`).catch(err => {});
+                await interaction.reply({ content: `🌍 I have notified the member that their guard log is approved.`, ephemeral: true });
                 await interaction.message.delete().catch(err => {});
             }
         }

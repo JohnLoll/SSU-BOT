@@ -39,15 +39,15 @@ module.exports = {
             const button = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
-                .setCustomId(`denied - ${id}`)
+                .setCustomId(`approved - ${id}`)
                 .setStyle(ButtonStyle.Success)
-                .setLabel(`Approve`)
+                .setLabel(`✅ Approve`)
             )
             .addComponents(
                 new ButtonBuilder()
-                .setCustomId(`approved - ${id}`)
+                .setCustomId(`denied - ${id}`)
                 .setStyle(ButtonStyle.Danger)
-                .setLabel(`Deny`)
+                .setLabel(`❌ Deny`)
             );
             await channel.send({ embeds: [embed], components: [button] }).catch(err => {});
             await interaction.reply({ content: `🌍 Your guard log request has been recorded.  You will be notifed if it gets accepted or denied.`, ephemeral: true });

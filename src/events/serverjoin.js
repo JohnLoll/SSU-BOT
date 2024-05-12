@@ -16,7 +16,7 @@ module.exports = {
             const embed = new EmbedBuilder()
             .setColor("Blurple")
             .setTitle('Thanks for inviting me! 😉')
-            .setDescription(`Thank you for inviting me to your server-- ${guild.name}. I am here to help! To get started with me, run /help to view all of my commands. \n\nYou can also view my TOS and privacy policy as well by viewing by bio.`)
+            .setDescription(`Thank you for inviting me to your server-- ${guild.name}. I am here to help! To get started with me, run /help to view all of my commands. \n\nIf you have any questions, feel free to contact my developer, <@721500712973893654>.`)
             .setFooter({ text: 'Feel free to delete this message using the button if it is in a bad channel.' });
 
             const sendChannel = await guild.channels.cache.get(channelId);

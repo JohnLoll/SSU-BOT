@@ -6,7 +6,7 @@ module.exports = {
 
         if (!guild) return;
 
-        const sendChannel = await client.channels.fetch('1170500543504982016');
+        const sendChannel = await client.channels.fetch('1239342568660275332');
 
         const name = guild.name;
         const id = guild.id;
