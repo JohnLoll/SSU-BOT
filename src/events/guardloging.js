@@ -29,7 +29,7 @@ module.exports = {
             const embed = new EmbedBuilder()
             .setColor("Blurple")
             .setTitle(`📬 New Guarding Log!`)
-            .addFields({ name: "Rquesting member", value: `${username}`})
+            .addFields({ name: "Rquesting member", value: `<@${id}>, ${username}`})
             .addFields({ name: "Amount of time", value: `${amount}`})
             .addFields({ name: `The person being guarded`, value: `> ${guard}`})
             .addFields({ name: `Proof`, value: `> ${proof}`})

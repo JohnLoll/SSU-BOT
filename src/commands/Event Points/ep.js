@@ -94,7 +94,7 @@ module.exports = {
                       embeds: [
                           new EmbedBuilder()
                               .setTitle(`EP ${operation === 'add' ? 'Addition' : 'Removal'}`)
-                              .setDescription(`You have ${operation === 'add' ? 'received' : 'lost'} ${amount} EP.\nReason: ${reason}`)
+                              .setDescription(`<@${mentionedUser}> ${operation === 'add' ? 'added' : 'removed'} ${amount} EP, for reason: ${reason}`)
                               .setColor(operation === 'add' ? '#00FF00' : '#FF0000') // Green or Red
                               .setTimestamp()
                               .setFooter({
@@ -161,8 +161,8 @@ module.exports = {
                           values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
                           values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
             
-                          const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 3);
-                          const totalColumnLetter = getColumnLetter(totalPointsColumn + 3);
+                          const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 1);
+                          const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
           
                           modifiedCells.push({
                             range: `${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`,
@@ -259,15 +259,15 @@ module.exports = {
                           values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
                           values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
             
-                          const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 3);
-                          const totalColumnLetter = getColumnLetter(totalPointsColumn + 3);
+                          const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 1);
+                          const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
           
                           modifiedCells.push({
-                            range: `${weeklyColumnLetter}${rowIndex + 62}:${totalColumnLetter}${rowIndex + 62}`,
+                            range: `${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`,
                             values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
                           });
                           
-          console.log(`${weeklyColumnLetter}${rowIndex + 62}:${totalColumnLetter}${rowIndex + 62}`);
+          console.log(`${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`);
                           found = true;
                           break;
                         }
