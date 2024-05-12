@@ -20,7 +20,7 @@ module.exports = {
         .setDescription(
           "**/help** - Views all the possible commands.\n" +
           //"**/userinfo [user]** - Views users company, their EP and CEP (if not filled in, it views your CEP and EP).\n" +
-          "**/ping** - Get the current bot-to-discord ping.\n" +
+          //"**/ping** - Get the current bot-to-discord ping.\n" +
           "**/epboard** - Views the event point leaderboard.\n" +
           //"**/cepboard** - Views your company event point leaderboard.\n" +
           //"**/update {user(s)}** Used to update a user's role based on EP.\n"+

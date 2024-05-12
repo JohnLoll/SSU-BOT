@@ -11,7 +11,7 @@ module.exports = {
     .addSubcommand(command => command.setName('ping').setDescription(`Displays the bot's ping... Pong.. PANG!!`))
     .addSubcommand(command => command.setName('online').setDescription(`Shows the online status of YourBot, a great way to see if our bot works!`)),
     async execute(interaction, client) {
- 
+ const avatar = interaction.guild.iconURL()
         const sub = interaction.options.getSubcommand();
  
         switch (sub) {
@@ -30,24 +30,12 @@ module.exports = {
  
         let uptime = `**${days}**d **${hours}**h **${minutes}**m **${seconds}**s`;
  
-        const button = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-            .setLabel('Support Server')
-            .setStyle(ButtonStyle.Link)
-            .setURL("https://discord.gg/CSYjWb7tzs"),
- 
-            new ButtonBuilder()
-            .setLabel('Bot Invite')
-            .setStyle(ButtonStyle.Link)
-            .setURL("https://discord.com/api/oauth2/authorize?client_id=1076798263098880116&permissions=137439292488&scope=bot%20applications.commands")
-        )
- 
+       
         const embed = new EmbedBuilder()
         .setColor("Purple")
         .setTitle(`> Bot's Statistics`)
         .setAuthor({ name: '🤖 Bot Statistics Tool'})
-        .setThumbnail('https://cdn.discordapp.com/attachments/1080219392337522718/1081227919256457246/largepurple.png')
+        .setThumbnail(avatar)
         .setFooter({ text: `🤖 YourBot's statistics`})
         .setTimestamp()
         .addFields({ name: '• Servers Count', value: `> ${client.guilds.cache.size}`, inline: true})
@@ -55,7 +43,7 @@ module.exports = {
         .addFields({ name: '• Latency', value: `> ${Math.round(client.ws.ping)}ms`, inline: false})
         .addFields({ name: '• Uptime', value: `> ${uptime}`, inline: false})
  
-        await interaction.reply({ embeds: [embed], components: [button] })
+        await interaction.reply({ embeds: [embed]})
  
         break;
         case 'specs':
@@ -68,7 +56,7 @@ module.exports = {
         const memoryTotal = os.totalmem()/1000000000
         const specsembed = new EmbedBuilder()
         .setTitle('> System Usage')
-        .setThumbnail('https://cdn.discordapp.com/icons/1078641070180675665/c3ee76cdd52c2bba8492027dfaafa15d.webp?size=1024')
+        .setThumbnail(avatar)
         .setAuthor({ name: `💻 Bot Specs`})
         .setColor("DarkRed")
         .setFooter({ text: `💻 Bot Specs initialized`})
@@ -90,7 +78,7 @@ module.exports = {
         .setFooter({ text: `🏓 Ping recorded`})
         .setTimestamp()
         .setAuthor({ name: `🏓 Ping Command`})
-        .setThumbnail('https://cdn.discordapp.com/attachments/1080219392337522718/1081275127850864640/largeblue.png')
+        .setThumbnail(avatar)
  
         await interaction.reply({ embeds: [embedping] })
  
@@ -104,7 +92,7 @@ module.exports = {
         .setFooter({ text: `🟢 Online command succeeded`})
         .setTimestamp()
         .setAuthor({ name: `🟢 Online Command`})
-        .setThumbnail('https://cdn.discordapp.com/attachments/1080219392337522718/1081199958704791552/largegreen.png')
+        .setThumbnail(avatar)
  
         await interaction.reply({ embeds: [embedonline] })
  
