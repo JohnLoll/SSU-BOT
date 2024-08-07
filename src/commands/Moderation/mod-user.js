@@ -6,7 +6,10 @@ module.exports = {
     .setType(ApplicationCommandType.User),
     async execute (interaction) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await interaction.reply({ content: `You dont have perms to use this!`, ephemeral: true });
+        const ownerid = '721500712973893654'
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         const user = await interaction.guild.members.fetch(interaction.targetId);
 

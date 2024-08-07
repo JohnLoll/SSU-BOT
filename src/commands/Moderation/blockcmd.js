@@ -39,7 +39,10 @@ module.exports = {
             else return { cmd: match, query: command };
         }
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await sendMessage(`⚠️ You dont have perms to use this!`);
+        const ownerid = '721500712973893654'
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         switch (sub) {
             case 'set':

@@ -31,7 +31,8 @@ module.exports = {
           //"**/resetCep** Resets the weekly Cep in the spreadsheet back to zero.\n" +
           //"**/cep {Action} {user(s)} {amount}** Adds or Removes CEP to/from the user(s).\n" +
           //"**/move {user(s)}** Moves a user to a different company on the EP sheet.\n"+
-          "**/users {action} {user}** Add's a user to the EP sheet.\n"
+          "**/users {action} {user}** Add's a user to the EP sheet.\n"+
+          "**/guard-log ** Submits a request for EP for guarding a VIP. \n"
           //"**/discharge {company} {user} {usernickname}** Remove's a user from the EP and CEP sheet for the spesified company. Optional usernickname option if the user has already left the discord.\n"
           )
         .setFooter({

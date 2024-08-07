@@ -1,6 +1,6 @@
 const {ChannelType, ButtonInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits} = require('discord.js');
-const TicketSchema = require('../../Schemas/Ticket');
-const TicketSetup = require('../../Schemas/TicketSetup');
+const TicketSchema = require('../Schemas/Ticket');
+const TicketSetup = require('../Schemas/TicketSetup');
 const config = require('../../config');
 
 module.exports = {

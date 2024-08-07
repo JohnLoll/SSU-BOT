@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
 const {epModel} = require('../../Schemas/ep');
-
+const ownerid = '721500712973893654'
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('epsheet')
@@ -8,6 +8,9 @@ module.exports = {
     .addSubcommand(command => command.setName('add').setDescription('Add the EP sheet config to the database.')
     .addStringOption(option => option.setName('sheetid').setDescription('EP spreedsheet id.').setRequired(true))
     .addStringOption(option => option.setName('range').setDescription('The range for the EP spreedsheet.').setRequired(true))
+    .addIntegerOption(option => option.setName('start').setDescription('The row the sheet starts at.').setRequired(true))
+    .addIntegerOption(option => option.setName('trooperstart').setDescription('The row where the trooper section starts.').setRequired(true))
+    .addStringOption(option => option.setName('trooperrange').setDescription('The Trooper range for the EP spreedsheet.').setRequired(true))
     .addIntegerOption(option => option.setName('weeklyoffset').setDescription('The offset for the weekly cepModel.').setRequired(true))
     .addIntegerOption(option => option.setName('totaloffset').setDescription('The offset for the total cepModel.').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove the Ep sheet config from the database'))
@@ -32,8 +35,11 @@ module.exports = {
             var name = 'EP';
             var sheetid = options.getString('sheetid');
             var range = options.getString('range');
+            var start = options.getInteger('start');
             var weeklyoffset = options.getInteger('weeklyoffset');
             var totaloffset = options.getInteger('totaloffset');
+            var trooperstart = options.getInteger('trooperstart');
+            var trooperrange = options.getInteger('trooperrange');
 
 
             await data.forEach(async value => {
@@ -41,12 +47,17 @@ module.exports = {
                 if (value.Range == range) return check = true;
                 if (value.Weeklyoffset == weeklyoffset) return check = true;
                 if (value.Totaloffset == totaloffset) return check = true;
+                if (value.Trooperstart == trooperstart) return check = true;
+                if (value.Trooperrange == trooperrange) return check = true;
+                if (value.start == start) return check = true;
             });
 
             return check;
         }
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await sendMessage(`⚠️ You dont have perms to use this!`);
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         switch (sub) {
             case 'add':
@@ -54,8 +65,11 @@ module.exports = {
                 var name = 'EP';
                 var sheetid = options.getString('sheetid');
                 var range = options.getString('range');
+                var start = options.getInteger('start');
                 var weeklyoffset = options.getInteger('weeklyoffset');
                 var totaloffset = options.getInteger('totaloffset');
+                var trooperstart = options.getInteger('trooperstart');
+                var trooperrange = options.getInteger('trooperrange');
                 if (check) {
                     return await sendMessage(`⚠️ Looks like that is already a companys name!`);
                 } else {
@@ -63,9 +77,12 @@ module.exports = {
                         Guild: interaction.guild.id,
                         Name: name,
                         Sheetid: sheetid,
+                        Start: start,
                         Range: range,
                         Weeklyoffset: weeklyoffset,
                         Totaloffset: totaloffset,
+                        Trooperstart: trooperstart,
+                        Trooperrange: trooperrange,
                     });
 
                     return await sendMessage(`🌍 I have added the ${name} config to the database!`);
@@ -93,7 +110,7 @@ module.exports = {
                     if (!value.Name) return;
                     else {
                        
-                        values.push(`**Sheetid:** ${value.Sheetid}\n**Range:** ${value.Range}\n**Weekly Offset:** ${value.Weeklyoffset}\n**Total Offset:** ${value.Totaloffset}`);
+                        values.push(`**Sheetid:** ${value.Sheetid}\n**Range:** ${value.Range}\n**Weekly Offset:** ${value.Weeklyoffset}\n**Total Offset:** ${value.Totaloffset} \n**Start:** ${value.Start}\n**Trooper Start:** ${value.Trooperstart}\n**Trooper Range:** ${value.Trooperrange}\n\n`);
                     }
                 });
 

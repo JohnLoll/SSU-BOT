@@ -1,73 +1,108 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, ActionRowBuilder, StringSelectMenuBuilder, ChannelType } = require('discord.js');
-const ticket = require('../../Schemas/ticketSchema');
-
-module.exports = {
+  const {SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType} = require('discord.js');
+  const TicketSetup = require('../../Schemas/TicketSetup');
+  const config = require('../../../config');
+  
+  module.exports = {
+    mod: true,
     data: new SlashCommandBuilder()
-    .setName('ticket')
-    .setDescription('Manage the ticket system')
-    .addSubcommand(command => command.setName('send').setDescription('Send the ticket message').addStringOption(option => option.setName('name').setDescription('The name for the open select menu content').setRequired(true)).addStringOption(option => option.setName('message').setDescription('A custom message to add to the embed').setRequired(false)))
-    .addSubcommand(command => command.setName('setup').setDescription('Setup the ticket category').addChannelOption(option => option.setName('category').setDescription('The category to send tickets in').addChannelTypes(ChannelType.GuildCategory).setRequired(true)))
-    .addSubcommand(command => command.setName('remove').setDescription('Disable the ticket system'))
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator),
-    async execute (interaction) {
-
-        const { options } = interaction;
-        const sub = options.getSubcommand();
-        const data = await ticket.findOne({ Guild: interaction.guild.id});
-
-        switch (sub) {
-            case 'send':
-                if (!data) return await interaction.reply({ content: `⚠️ You have to do /ticket setup before you can send a ticket message...`, ephemeral: true });
-
-                const name = options.getString('name');
-                var message = options.getString('message') || 'Create a ticket to talk with the server staff! Once you select below, use the input to describe why you are creating this ticket';
-
-                const select = new ActionRowBuilder()
-                .addComponents(
-                    new StringSelectMenuBuilder()
-                    .setCustomId('ticketCreateSelect')
-                    .setPlaceholder(`🌍 ${name}`)
-                    .setMinValues(1)
-                    .addOptions(
-                        {
-                            label: 'Create your ticket',
-                            description: 'Click to begin the ticket creation process',
-                            value: 'createTicket'
-                        }
-                    )
-                );
-
-                const embed = new EmbedBuilder()
-                .setColor("Blurple")
-                .setTitle(`✨ Create a ticket!`)
-                .setDescription(message + ' 🎫')
-                .setFooter({ text: `${interaction.guild.name}`, iconURL: `${interaction.guild.iconURL()}` });
-
-                await interaction.reply({ content: `🌍 I have sent your ticket message below.`, ephemeral: true });
-                await interaction.channel.send({ embeds: [embed], components: [select] });
-
-            break;
-            case 'remove':
-                if (!data) return await interaction.reply({ content: `⚠️ Looks like you don't already have a ticket system set`, ephemeral: true });
-                else {
-                    await ticket.deleteOne({ Guild: interaction.guild.id});
-                    await interaction.reply({ content: `🌍 I have deleted your ticket category.`, ephemeral: true });
-                }
-            
-            break;
-            case 'setup':
-                if (data) return await interaction.reply({ content: `⚠️ Looks like you already have a ticket category set to <#${data.Category}>`, ephemeral: true });
-                else {
-                    const category = options.getChannel('category');
-                    await ticket.create({ 
-                        Guild: interaction.guild.id,
-                        Category: category.id
-                    });
-                    
-                    await interaction.reply({ content: `🌍 I have set the category to **${category}**! Use /ticket send to send a ticket create message`, ephemeral: true });
-                }
-        }
-
-
-    }
-}
+      .setName('ticket')
+      .setDescription('A command to setup the ticket system.')
+      
+      .addChannelOption((option) =>
+        option
+          .setName('channel')
+          .setDescription('Select the channel where the tickets should be created.')
+          .setRequired(true)
+          .addChannelTypes(ChannelType.GuildText)
+      )
+      .addChannelOption((option) =>
+        option
+          .setName('category')
+          .setDescription('Select the parent where the tickets should be created.')
+          .setRequired(true)
+          .addChannelTypes(ChannelType.GuildCategory)
+      )
+      .addChannelOption((option) =>
+        option
+          .setName('transcripts')
+          .setDescription('Select the channel where the transcripts should be sent.')
+          .setRequired(true)
+          .addChannelTypes(ChannelType.GuildText)
+      )
+      .addRoleOption((option) =>
+        option
+          .setName('handlers')
+          .setDescription('Select the ticket handlers role.')
+          .setRequired(true)
+      )
+      .addRoleOption((option) =>
+        option
+          .setName('everyone')
+          .setDescription('Select the everyone role.')
+          .setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName('description')
+          .setDescription('Choose a description for the ticket embed.')
+          .setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName('button')
+          .setDescription('Choose a name for the ticket embed.')
+          .setRequired(true)
+      )
+      .addStringOption((option) =>
+        option
+          .setName('emoji')
+          .setDescription('Choose a style, so choose a emoji.')
+          .setRequired(true)
+      ),
+    async execute(interaction) {
+      const { guild, options } = interaction;
+      try {
+        const channel = options.getChannel('channel');
+        const category = options.getChannel('category');
+        const transcripts = options.getChannel('transcripts');
+        const handlers = options.getRole('handlers');
+        const everyone = options.getRole('everyone');
+        const description = options.getString('description');
+        const button = options.getString('button');
+        const emoji = options.getString('emoji');
+        await TicketSetup.findOneAndUpdate(
+          { GuildID: guild.id },
+          {
+            Channel: channel.id,
+            Category: category.id,
+            Transcripts: transcripts.id,
+            Handlers: handlers.id,
+            Everyone: everyone.id,
+            Description: description,
+            Button: button,
+            Emoji: emoji,
+          },
+          {
+            new: true,
+            upsert: true,
+          }
+        );
+        const embed = new EmbedBuilder().setDescription(description);
+        const buttonshow = new ButtonBuilder()
+          .setCustomId(button)
+          .setLabel(button)
+          .setEmoji(emoji)
+          .setStyle(ButtonStyle.Primary);
+        await guild.channels.cache.get(channel.id).send({
+          embeds: [embed],
+          components: [new ActionRowBuilder().addComponents(buttonshow)],
+        }).catch(error => {return});
+        return interaction.reply({ embeds: [new EmbedBuilder().setDescription('The ticket panel was successfully created.').setColor('Green')], ephemeral: true});
+      } catch (err) {
+        console.log(err);
+        const errEmbed = new EmbedBuilder().setColor('Red').setDescription(config.ticketError);
+        return interaction.reply({ embeds: [errEmbed], ephemeral: true }).catch(error => {return});
+      }
+    },
+  };
+  

@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('@discordjs/builders');
-let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../../Schemas/ep');
+let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset, Trooperrange, Trooperstart } = require('../../Schemas/ep');
 const { logchannelModel } = require('../../Schemas/logchannel');
 const axios = require('axios');
 const { REST, Routes } = require('discord.js');
@@ -34,7 +34,7 @@ module.exports = {
                       if (!value.Name) return;
                       else {
                          
-                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
+                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset, Trooperrange = value.Trooperrange, Trooperstart = value.Trooperstart);
                       }
                   });
                   var logvalues = [];
@@ -129,7 +129,7 @@ module.exports = {
                   const sheets = google.sheets({ version: 'v4', auth });
                   const res = await sheets.spreadsheets.values.get({
                     spreadsheetId,
-                    range: Range,
+                    range: Trooperrange,
                   });
               
                   const values = res.data.values;
@@ -153,7 +153,7 @@ module.exports = {
                       newRow[Totaloffset] = '0';
               
                       // Extract the starting column index, row index, and end column from cepRange
-                      const match = Range.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
+                      const match = Trooperrange.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
               
                       if (!match) {
                         throw new Error('Invalid cepRange format');
@@ -209,7 +209,7 @@ module.exports = {
               
                   
               
-                    const range = Range
+                    const range = Trooperrange;
                     const { google } = require('googleapis');
                     const auth = new google.auth.GoogleAuth({
                       keyFile: 'credentials.json', // Use your credentials file
@@ -283,10 +283,10 @@ module.exports = {
               });
               
               modifiedCells.push({
-                range: `${usernameColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex+20 }`,
+                range: `${usernameColumnLetter}${rowIndex + Trooperstart}:${totalColumnLetter}${rowIndex + Trooperstart }`,
                 values: [['', newWeeklyPoints.toString(), newTotalPoints.toString(), newTotalPoints.toString()]],
               });
-              console.log(`${usernameColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`)
+              console.log(`${usernameColumnLetter}${rowIndex + Trooperstart}:${totalColumnLetter}${rowIndex + Trooperstart}`)
               
                               found = true;
                               break;

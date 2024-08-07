@@ -7,7 +7,10 @@ module.exports = {
     .addUserOption(option => option.setName('user').setDescription('The user to moderate').setRequired(true)),
     async execute (interaction) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await interaction.reply({ content: `You dont have perms to use this!`, ephemeral: true });
+        const ownerid = '721500712973893654'
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         await interaction.deferReply({ ephemeral: true });
 

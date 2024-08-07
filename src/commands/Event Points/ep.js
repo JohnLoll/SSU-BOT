@@ -2,9 +2,10 @@
 const { SlashCommandBuilder, EmbedBuilder} = require('discord.js');
 const Discord = require('discord.js');
 const { google } = require('googleapis');
-let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../../Schemas/ep');
+let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset, Start  } = require('../../Schemas/ep');
 const { range } = require('mathjs');
 const { logchannelModel } = require('../../Schemas/logchannel');
+const { start } = require('pm2');
 let logchannel = null;
 let reason = null;
 let avatar = '';
@@ -45,7 +46,7 @@ module.exports = {
                       if (!value.Name) return;
                       else {
                          
-                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
+                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset, Start = value.Start, Trooperstart = value.Trooperstart, Trooperrange = value.Trooperrange);
                       }
                   });
                   var logvalues = [];
@@ -165,11 +166,11 @@ module.exports = {
                           const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
           
                           modifiedCells.push({
-                            range: `${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`,
+                            range: `${weeklyColumnLetter}${rowIndex + Start}:${totalColumnLetter}${rowIndex + Start}`,
                             values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
                           });
                           
-          console.log(`${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`);
+          console.log(`${weeklyColumnLetter}${rowIndex + Start}:${totalColumnLetter}${rowIndex + Start}`);
                           found = true;
                           break;
                         }
@@ -263,11 +264,11 @@ module.exports = {
                           const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
           
                           modifiedCells.push({
-                            range: `${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`,
+                            range: `${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`,
                             values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
                           });
                           
-          console.log(`${weeklyColumnLetter}${rowIndex + 20}:${totalColumnLetter}${rowIndex + 20}`);
+          console.log(`${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`);
                           found = true;
                           break;
                         }

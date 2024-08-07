@@ -12,8 +12,10 @@ module.exports = {
         const { options } = interaction;
         const sub = options.getSubcommand();
         const data = await bot.findOne({ Guild: interaction.guild.id });
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You dont have perms to use this`, ephemeral: true });
+const ownerid = '721500712973893654'
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         const embed = new EmbedBuilder()
         .setColor("Blurple");

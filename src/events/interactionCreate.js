@@ -1,15 +1,18 @@
-const { Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require("discord.js");
+const { Interaction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, PermissionsBitField } = require("discord.js");
+const Discord = require('discord.js');
 const block = require('../Schemas/blockcmd');
 const modrole = require('../Schemas/modrole');
 const officerrole = require('../Schemas/officerrole');
 const companyrole = require('../Schemas/companyrole');
 const companyhicom = require('../Schemas/companyhicom');
-
+const ownerid = '721500712973893654'
 module.exports = {
     name: 'interactionCreate',
+    officer: true,
     async execute(interaction, client) {
 
         if (interaction.customId) {
+            
             if (interaction.customId.includes("bugSolved - ")) {
                 var stringId = interaction.customId;
                 stringId = stringId.replace("bugSolved - ", "");
@@ -32,16 +35,190 @@ module.exports = {
             }
         }
         if (interaction.customId) {
+            let staffmember = null;
+            let { epModel, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../Schemas/ep');
+let logchannel = null;
+const { logchannelModel } = require('../Schemas/logchannel');
             if (interaction.customId.includes("approved - ")) {
                 var stringId = interaction.customId;
                 stringId = stringId.replace("approved - ", "");
-
+        
                 var member = await client.users.fetch(stringId);
-                await member.send(`✅ Your guarding log that you requested has been APPROVED.`).catch(err => {});
+                
+                // Fetch the guild member to get the nickname
+                var guild = await client.guilds.fetch('1069439785984344096');
+                var guildMember = await guild.members.fetch(stringId);
+        staffmember = interaction.user.id
+                console.log(`User's nickname in the server: ${guildMember.nickname || guildMember.user.username}`);
+                var logdata = await logchannelModel.find({ Guild: interaction.guild.id});
+      var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });
+      var values = [];
+                  await data.forEach(async value => {
+                      if (!value.Name) return;
+                      else {
+                         
+                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
+                      }
+                  });
+                  var logvalues = [];
+                  await logdata.forEach(async value => {
+                      if (!value.Channel) return;
+                      else {
+                         
+                          logvalues.push(logchannel = value.Channel);
+                      }
+                  });
+  
+   
+   
+                const amountToAdd = 1;
+                await addep(guildMember.nickname, amountToAdd)
+                function getColumnLetter(columnIndex) {
+                    let letter = '';
+                  
+                    while (columnIndex >= 0) {
+                      const remainder = columnIndex % 26;
+                      letter = String.fromCharCode(65 + remainder) + letter;
+                      columnIndex = Math.floor(columnIndex / 26) - 1;
+                    }
+                  
+                    return letter;
+                  }
+                async function addep(officerNickname, amountToAdd){
+                  try {
+                   
+                
+                    const { google } = require('googleapis');
+                    
+                      const range = Range;
+                      const auth = new google.auth.GoogleAuth({
+                        keyFile: 'credentials.json', // Use your credentials file
+                        scopes: 'https://www.googleapis.com/auth/spreadsheets',
+                      });
+                      const sheets = google.sheets({ version: 'v4', auth });
+                      const res = await sheets.spreadsheets.values.get({
+                        spreadsheetId : Sheetid,
+                        range,
+                      });
+                
+                      const values = res.data.values;
+                
+                      if (values) {
+                        let rowIndex;
+                        let found = false;
+                        let modifiedCells = [];
+                
+                        for (let rIndex = 0; rIndex < values.length; rIndex++) {
+                          rowIndex = rIndex;
+                
+                          const row = values[rIndex];
+                
+                          for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                            const currentNickname = row[columnIndex];
+                
+                            if (currentNickname) {
+                            const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
+                            const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+                
+                            if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
+                              const weeklyPointsColumn = columnIndex + Weeklyoffset;
+                              const totalPointsColumn = columnIndex + Totaloffset;
+                
+                              const currentWeeklyPoints = parseInt(values[rowIndex][weeklyPointsColumn]);
+                              const currentTotalPoints = parseInt(values[rowIndex][totalPointsColumn]);
+                
+                              const newWeeklyPoints = currentWeeklyPoints + amountToAdd;
+                              const newTotalPoints = currentTotalPoints + amountToAdd;
+                
+                              values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
+                              values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
+                
+                              const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 1);
+                              const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
+              
+                              modifiedCells.push({
+                                range: `${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`,
+                                values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
+                              });
+                              
+              console.log(`${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`);
+                              found = true;
+                              break;
+                            }
+                          }
+                        }
+              
+                        if (found) {
+                          break;
+                        }
+                      }
+                        if (found) {
+                          // Update only the modified cells
+                          await sheets.spreadsheets.values.batchUpdate({
+                            spreadsheetId: Sheetid,
+                            resource: {
+                              data: modifiedCells,
+                              valueInputOption: 'USER_ENTERED',
+                            },
+                          });
+                        } else {
+                          console.log(`User with Discord nickname "${officerNickname}" not found in the spreadsheet.`);
+                          //interaction.channel.send(`User with Discord nickname "${officerNickname}" not found in the range: ${range}`);
+                          return;
+                        }
+                      } else {
+                        console.log('Spreadsheet data not found.');
+                      }
+                    
+                  } catch (error) {
+                    console.error('Error adding points to the spreadsheet:', error);
+                  }
+                  console.log(`Added **${amountToAdd}** event points to ${officerNickname}`);
+                  //interaction.channel.send(`Added **${amountToAdd}** Event Points to ${officerNickname}`);
+                  const guilds =interaction.guild
+       
+     
+                  const logEmbed = {
+                    color: 0xff0000, // Red color
+                    title: 'Guard Log Approved',
+                    description: 'Guard Log Approved',
+                    fields: [
+                      {
+                        name: 'Staff Memnber',
+                        value: `<@${staffmember}>`,
+                        inline: true,
+                      },
+                      {
+                        name: 'Users Affected',
+                        value: `<@${stringId}>`,
+                        inline: true,
+                      },
+                      {
+                        name: 'Amount Added',
+                        value: `1`,
+                        inline: true,
+                      },
+                    ],
+                    footer: {
+                      text: 'Command executed',
+                    },
+                    timestamp: new Date(),
+                  };
+                  
+                      // Send the log message to the log channel
+                       const logChannel = guilds.channels.cache.get(logchannel);
+                      if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+                        await logChannel.send({ embeds: [logEmbed] });
+                      }
+                }
+            
+                await member.send(`✅ Your guarding log that you requested has been APPROVED. You received 1 Event Point for guarding.`).catch(err => {});
                 await interaction.reply({ content: `🌍 I have notified the member that their guard log is approved.`, ephemeral: true });
                 await interaction.message.delete().catch(err => {});
             }
+ 
         }
+        
         if (!interaction.isCommand()) return;
 
         const command = client.commands.get(interaction.commandName);
@@ -60,34 +237,77 @@ module.exports = {
     
             //mod role
             if (command.mod) {
-                var modRoleData = await modrole.find({ Guild: interaction.guild.id});
+                const modRoleData = await modrole.find({ Guild: interaction.guild.id });
+            
+                let check = false;
+            
+                // Check if the user has a specific role
                 if (modRoleData.length > 0) {
-                    var check;
-                    await modRoleData.forEach(async value => {
-                        const mRoles = await interaction.member.roles.cache.map(role => role.id);
-                        await mRoles.forEach(async role => {
-                            if (role == value.Role) check = true;
-                        });
+                    const mRoles = interaction.member.roles.cache.map(role => role.id);
+                    for (const value of modRoleData) {
+                        if (mRoles.includes(value.Role)) {
+                            check = true;
+                            break;
+                        }
+                    }
+                }
+            
+                // Check if the user has the specific user ID or is an administrator
+                if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                    userHasCompanyRole = true;
+                } else if(interaction.user.id === ownerid) 
+                    userHasCompanyRole = true;
+                
+            
+                if (!check) {
+                    return await interaction.reply({
+                        content: `⚠️ Only **moderators** can use this command!`,
+                        ephemeral: true
                     });
-    
-                    if (!check) return await interaction.reply({ content: `⚠️ Only **moderators** can use this command!`, ephemeral: true });
                 }
             }
-              //officer role
-              if (command.officer) {
-                var officerRoleData = await officerrole.find({ Guild: interaction.guild.id});
+          // officer role
+          if (command.officer) {
+            try {
+                // Fetch officer role data
+                var officerRoleData = await officerrole.find({ Guild: interaction.guild.id });
+                
                 if (officerRoleData.length > 0) {
-                    var check;
-                    await officerRoleData.forEach(async value => {
-                        const mRoles = await interaction.member.roles.cache.map(role => role.id);
-                        await mRoles.forEach(async role => {
-                            if (role == value.Role) check = true;
-                        });
-                    });
-    
-                    if (!check) return await interaction.reply({ content: `⚠️ Only **Officers** can use this command!`, ephemeral: true });
+                    var userHasCompanyRole = false;
+                    
+                    // Check if the user is an administrator
+                    if (interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
+                        userHasCompanyRole = true;
+                    } else if (interaction.user.id === interaction.guild.ownerId) {
+                        userHasCompanyRole = true;
+                    } else {
+                        // Iterate through each officer role configuration
+                        for (const value of officerRoleData) {
+                            // Iterate through the user's roles
+                            for (const userRole of interaction.member.roles.cache.values()) {
+                                // Check if the user has a role that matches any role in the company's role array
+                                if (value.Role.includes(userRole.id)) {
+                                    userHasCompanyRole = true;
+                                    break; // Exit the loop if a match is found
+                                }
+                            }
+                            if (userHasCompanyRole) {
+                                break; // Exit the loop if a match is found
+                            }
+                        }
+                    }
+                    
+                    if (!userHasCompanyRole) {
+                        return await interaction.reply({ content: `⚠️Only **Officers** can use this command !`, ephemeral: true });
+                    }
+                } else {
+                    console.log('No officer role data found.');
                 }
+            } catch (error) {
+                console.error('Error fetching officer roles:', error);
+                return await interaction.reply({ content: `⚠️ An error occurred while checking roles. Please try again later.`, ephemeral: true });
             }
+        }
 //company role
 if (command.company) {
     var companyRoleData = await companyrole.find({ Guild: interaction.guild.id, Name: interaction.options.getString('company') });

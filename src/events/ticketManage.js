@@ -1,5 +1,5 @@
 const {EmbedBuilder, PermissionFlagsBits} = require('discord.js');
-const TicketSchema = require('../../Schemas/Ticket');
+const TicketSchema = require('../Schemas/Ticket');
 const config = require('../../config');
 
 module.exports = {

@@ -30,6 +30,7 @@ module.exports = {
                 existingConfig.Range = range;
                 existingConfig.Weeklyoffset = weeklyoffset;
                 existingConfig.Totaloffset = totaloffset;
+                 await existingConfig.save();
             }
 
             var logdata = await logchannelModel.find({ Guild: interaction.guild.id });

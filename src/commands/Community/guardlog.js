@@ -35,7 +35,7 @@ module.exports = {
         const proof = new TextInputBuilder()
         .setCustomId('proof')
         .setRequired(true)
-        .setPlaceholder('Be sure to be as detailed as possible so your guard log will get accepted.')
+        .setPlaceholder('Upload a screenshot via https://imgbb.com or something similar.')
         .setLabel('Proof of who you guarded.')
         .setStyle(TextInputStyle.Paragraph);
 

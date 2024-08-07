@@ -11,8 +11,10 @@ module.exports = {
     .addSubcommand(command => command.setName('apply').setDescription('Apply the current server backup'))
     .addSubcommand(command => command.setName('log').setDescription('log your backup')),
     async execute (interaction) {
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `👉 You dont have permissions to use this command!`, ephemeral: true });
+        const ownerid = '721500712973893654'
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
+            return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
+        }
 
         const { options } = interaction;
         const sub = options.getSubcommand();

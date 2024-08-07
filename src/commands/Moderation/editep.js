@@ -15,7 +15,7 @@ module.exports = {
                             values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
                         }
                     });
-        if (!interaction.guild) return await interaction.reply({ content: `⚠️ Please report this bug within a guild`, ephemeral: true });
+        if (!interaction.guild) return await interaction.reply({ content: `⚠️ Please do this within a guild`, ephemeral: true });
 
         const modal = new ModalBuilder()
         .setTitle(`Edit EP Configuration`)

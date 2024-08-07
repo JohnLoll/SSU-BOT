@@ -1,7 +1,7 @@
 const {EmbedBuilder, PermissionFlagsBits, UserSelectMenuBuilder, ActionRowBuilder} = require('discord.js');
 const {createTranscript} = require('discord-html-transcripts');
-const TicketSetup = require('../../Schemas/TicketSetup');
-const TicketSchema = require('../../Schemas/Ticket');
+const TicketSetup = require('../Schemas/TicketSetup');
+const TicketSchema = require('../Schemas/Ticket');
 const config = require('../../config');
 
 module.exports = {

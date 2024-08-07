@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, ChannelType } = 
 const xmas = require('../../Schemas/xmascountdown');
 
 module.exports = {
+    mod:true,
     data: new SlashCommandBuilder()
     .setName('christmas-countdown')
     .setDescription('Christmas countdown')
