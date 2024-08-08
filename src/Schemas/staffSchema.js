@@ -1,15 +1,13 @@
 const {model, Schema} = require('mongoose');
-
-let TicketSetup = new Schema({
+ 
+let StaffSetupMessage = new Schema({
     GuildID: String,
     Channel: String,
-    Category: String,
     Transcripts: String,
-    Handlers: String,
-    Everyone: String,
     Description: String,
     Button: String,
     Emoji: String,
+    Role: String
 })
-
-module.exports = model('TicketSetup', TicketSetup);
+ 
+module.exports = model('StaffSetupMessage', StaffSetupMessage);

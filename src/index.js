@@ -21,7 +21,292 @@ const commandFolders = fs.readdirSync("./src/commands");
     client.login(process.env.token)
 })();
 
-
+const StaffMessages = require('./Schemas/staffMessages');
+const StaffSchema = require('./Schemas/staffSchema');
+const ms = require('ms');
+ 
+const cooldowns = new Map();
+ 
+client.on(Events.InteractionCreate, async i => {
+  if (i.isButton()) {
+      if (i.customId === 'staffButton') {
+          const embed = new EmbedBuilder()
+              .setColor('Green')
+              .setDescription('Your application has started in your DMs. Please respond to them as quickly as possible.');
+ 
+          const member = i.member;
+ 
+          const ongoingApplication = await StaffMessages.findOne({ User: member.id, inProgress: true });
+ 
+          if (ongoingApplication) {
+            const embed = new EmbedBuilder()
+                .setColor('Red')
+                .setDescription('You already have an ongoing application. Please complete it before starting a new one.');
+ 
+            return i.reply({ embeds: [embed], ephemeral: true });
+        }
+ 
+          if (cooldowns.has(member.id)) {
+ 
+            const duration = await StaffMessages.findOne({ Guild: i.guild.id});
+ 
+            const cooldownTime = ms(duration.Duration);
+            const currentTime = new Date().getTime();
+            const timeDifference = currentTime - cooldowns.get(member.id);
+    
+            if (timeDifference < cooldownTime) {
+ 
+              const remainingTimeInSeconds = Math.ceil((cooldownTime - timeDifference) / 1000);
+              const remainingDays = Math.floor(remainingTimeInSeconds / 86350);
+              const remainingHours = Math.floor((remainingTimeInSeconds % 86350) / 3600);
+              const remainingMinutes = Math.floor((remainingTimeInSeconds % 3600) / 60);
+              const remainingSeconds = remainingTimeInSeconds % 60;
+              
+              const remainingTime = `${remainingDays} days, ${remainingHours} hours, ${remainingMinutes} minutes, ${remainingSeconds} seconds`;
+  
+              return await i.reply({ content: `You have to wait ${remainingTime} before starting a new application process.`, ephemeral: true });
+            }
+          }
+ 
+          const botUser = client.user;
+          const botAvatar = botUser.avatarURL();
+ 
+          member.send({ 
+            embeds: [
+              new EmbedBuilder()
+                .setColor(0xb0c4de)
+                .setTitle('Department Application')
+                .setDescription(`Thank you for your interest in joining a department in SSU. To begin the application process, please reply to this message with **yes**. If you wish to cancel the application at any time, simply reply with **No**.`)
+                .addFields(
+                  { name: '👍 Tips 👍', value: 'Be honest, detailed and respectful in your answers. Show us why you are a good fit for the department and what you can contribute.' }
+                )
+                .setThumbnail(botAvatar)
+            ]
+          }).then( async () => {
+            i.reply({ embeds: [embed], ephemeral: true });
+ 
+            cooldowns.set(member.id, new Date().getTime());
+            
+            const staffMessage = await StaffMessages.create({
+              Guild: i.guild.id,
+              User: member.id,
+              Messages: '',
+              QuestionNumber: 0,
+              inProgress: true              
+            });
+            await staffMessage.save();
+          }).catch(err => {
+            i.reply({ content: "You have to enable your DMs to be able to interact with this button.", ephemeral: true });
+          });
+          
+ 
+          const missingQuestionNumber = await StaffMessages.find({ QuestionNumber: { $exists: false } });
+          
+          for (const doc of missingQuestionNumber) {
+              doc.QuestionNumber = 1;
+              await doc.save();
+          }
+      }
+  }
+});
+ 
+client.on(Events.MessageCreate, async message => {
+  if (message.channel.type == ChannelType.DM) {
+ 
+    const member = message.author
+ 
+      const staffMessage = await StaffMessages.findOne({ User: member.id });
+      
+      if (staffMessage) {
+ 
+        if (message.content.toLowerCase() === 'yes') {
+        } else if (staffMessage.QuestionNumber === 0) {
+          member.send({ content: `Your staff application has been cancelled.` }).catch(err => {
+            return;
+        })
+          await StaffMessages.deleteMany({ User: member.id });
+          return;
+        }
+ 
+        const questioning = await StaffMessages.findOne({ Guild: staffMessage.Guild });
+ 
+        const question1 = questioning.Question1
+        const question2 = questioning.Question2
+        const question3 = questioning.Question3
+        const question4 = questioning.Question4
+        const question5 = questioning.Question5
+        const question6 = questioning.Question6
+        const question7 = questioning.Question7
+        const question8 = questioning.Question8
+        const question9 = questioning.Question9
+        const question10 = questioning.Question10
+ 
+        let questions = [
+          question1,
+          question2,
+          question3,
+          question4,
+          question5,
+          question6,
+          question7,
+          question8,
+          question9,
+          question10
+        ].filter((question) => question !== undefined && question !== null);
+ 
+          staffMessage.Messages += `${message.content}\n`;
+          staffMessage.QuestionNumber += 1;
+          await staffMessage.save();
+ 
+          if (staffMessage.QuestionNumber <= questions.length) {
+            let currentQuestion = questions[staffMessage.QuestionNumber - 1];
+            if (currentQuestion !== undefined && currentQuestion !== null) {
+              const botUser = client.user;
+              const botAvatar = botUser.avatarURL();
+              
+              const questionEmbed = new EmbedBuilder()
+                .setColor(0x2f3136)
+                .setAuthor({
+                  name: 'Department Application',
+                  iconURL: botAvatar,
+                })
+                .setTitle(`Question ${staffMessage.QuestionNumber}`)
+                .setDescription(currentQuestion)
+                .addFields({ name: 'Note', value: 'Please limit your answer to 350 characters or less.' })
+                .setThumbnail(botAvatar)
+                .setFooter({ text:'Thank you for your interest in joining our team.'})
+                .setTimestamp()
+ 
+                member.send({ embeds: [questionEmbed] }).catch(err => {
+                  return;
+              })
+            }
+          } else {
+ 
+            await StaffMessages.deleteMany({ User: member.id });
+ 
+            const embed = new EmbedBuilder()
+            .setColor('Green')
+            .setTitle('Application Complete :white_check_mark:')
+            .setDescription('Your application has been sent in and will be reviewed by HICOM.')
+  
+            member.send({ embeds: [embed] }).catch(err => {
+              return;
+          })
+ 
+            let messages = staffMessage.Messages.split('\n');
+ 
+            let appQuestion1 = messages[1];
+            let appQuestion2 = messages[2];
+            let appQuestion3 = messages[3];
+            let appQuestion4 = messages[4];
+            let appQuestion5 = messages[5];
+            let appQuestion6 = messages[6];
+            let appQuestion7 = messages[7];
+            let appQuestion8 = messages[8];
+            let appQuestion9 = messages[9];
+            let appQuestion10 = messages[10];
+ 
+            const applicationsEmbed = new EmbedBuilder()
+            .setColor(0x18e1ee)
+            .setTitle(`Department Application`)
+            .setDescription(`Application from ${member.username}`)
+            .addFields(
+              { name: 'Discord Name', value: `${member.tag} - ${member}`, inline: true },
+              { name: 'Discord ID', value: `${member.id}`, inline: true },
+              { name: "Joined Discord",value:`<t:${parseInt(member.createdAt/1000)}:f>\n (<t:${parseInt(member.createdAt/1000)}:R>)`,inline:true},
+              { name: '\u200B\n', value: '\u200B\n', inline: false }
+            );
+          
+            if (appQuestion1) {
+              if (appQuestion1.length > 350) {
+                appQuestion1 = 'Answer was too long';
+              }
+              applicationsEmbed.addFields({ name: 'Question 1', value: appQuestion1, inline: true });
+            }
+            if (appQuestion2) {
+              if (appQuestion2.length > 350) {
+                appQuestion2 = 'Answer was too long';
+              }
+              applicationsEmbed.addFields({ name: 'Question 2', value: appQuestion2, inline: true });
+            }
+            if (appQuestion3) {
+              if (appQuestion3.length > 350) {
+                appQuestion3 = 'Answer was too long';
+              }
+              applicationsEmbed.addFields({ name: 'Question 3', value: appQuestion3, inline: true });
+              applicationsEmbed.addFields({ name: '\u200B\n', value: '\u200B\n', inline: false });
+            }
+              if (appQuestion4) {
+                if (appQuestion4.length > 350) {
+                  appQuestion4 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 4', value: appQuestion4, inline: true });
+              }
+              if (appQuestion5) {
+                if (appQuestion5.length > 350) {
+                  appQuestion5 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 5', value: appQuestion5, inline: true });
+              }
+              if (appQuestion6) {
+                if (appQuestion6.length > 350) {
+                  appQuestion6 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 6', value: appQuestion6, inline: true });
+                applicationsEmbed.addFields({ name: '\u200B\n', value: '\u200B\n', inline: false });
+              }
+              if (appQuestion7) {
+                if (appQuestion7.length > 350) {
+                  appQuestion7 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 7', value: appQuestion7, inline: true });
+              }
+              if (appQuestion8) {
+                if (appQuestion8.length > 350) {
+                  appQuestion8 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 8', value: appQuestion8, inline: true });
+              }
+              if (appQuestion9) {
+                if (appQuestion9.length > 350) {
+                  appQuestion9 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 9', value: appQuestion9, inline: true });
+                applicationsEmbed.addFields({ name: '\u200B\n', value: '\u200B\n', inline: false });
+              }
+              if (appQuestion10) {
+                if (appQuestion10.length > 350) {
+                  appQuestion10 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 10', value: appQuestion10, inline: true });
+              }
+          
+          applicationsEmbed.setTimestamp();
+ 
+          const staffSchema = await StaffSchema.findOne({ GuildID: staffMessage.Guild });
+ 
+          const channel = client.channels.cache.get(staffSchema.Transcripts);
+ 
+          const message = await channel.send({ embeds: [applicationsEmbed], content: staffSchema.Role ? `<@&${staffSchema.Role}>` : null });
+ 
+          const thread = await message.startThread({
+              name: 'New Department Application',
+              autoArchiveDuration: 10080,
+          });
+  
+          const threadReplyEmbed = new EmbedBuilder()
+              .setColor(0x18e1ee)
+              .setTitle('New Department Application')
+              .setDescription('A new department application has been submitted.')
+              .setTimestamp();
+  
+          await thread.send({ embeds: [threadReplyEmbed] });
+ 
+          }
+      }
+  }
+});
 client.on(Events.MessageCreate, async message => {
     if (!message.guild) return;
     if (message.author.bot) return;
@@ -107,56 +392,54 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
-
-const puppeteer = require('puppeteer');
-client.on(Events.MessageCreate, async message => {
-    if (message.channel.type !== ChannelType.DM) return;
-    if (message.author.bot) return;
-
-    var value;
-    await message.channel.sendTyping();
-    setTimeout(async () => {
-        if (!value) await message.channel.sendTyping();
-    }, 10000);
-
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
-
-    await page.goto('https://chat-app-f2d296.zapier.app/');
-
-    const textBoxSelector = 'textarea[aria-label="chatbot-user-prompt"]';
-    await page.waitForSelector(textBoxSelector);
-    await page.type(textBoxSelector, message.content);
-
-    await page.keyboard.press("Enter");
-
-    await page.waitForSelector('[data-testid="final-bot-response"] p').catch(err => {
-        return;
-    });
-
-    value = await page.$$eval('[data-testid="final-bot-response"]', async (elements) => {
-        return elements.map((element) => element.textContent);
-    });
-
-    await browser.close();
-
-    value.shift()
-
-    const output = value.join('\n\n\n\n');
-    if (output.length > 2000) {
-        const chunks = output.match(/.{1,2000}/g);
-
-        for (let i = 0; i < chunks.length; i++) {
-            await message.author.send(chunks[i]).catch(err => {
-                console.log(err)
-                message.author.send("I can't find what you are looking for right now.").catch(err => {});
-            });
-        } 
-    } else {
-        await message.author.send(output).catch(err => {
-            message.author.send("I can't find what you are looking for right now.").catch(err => {});
-        });
+const reactSchema = require("./Schemas/reactionrole");
+client.on(Events.InteractionCreate, async (interaction) => {
+    if (interaction.customId === "reactionrole") {
+        const guild = interaction.guild.id;
+        const message = interaction.message.id;
+        const reactchannel = interaction.channel.id;
+ 
+        const reactData = await reactSchema.findOne({
+            Guild: guild,
+            Message: message,
+            Channel: reactchannel
+        })
+ 
+        if (!reactData) {
+            return;
+        } else if (reactData) {
+            //Role ID
+            const ROLE_ID = reactData.Role;
+            //try add/remove role
+            try {
+                const targetMember = interaction.member;
+                const role = interaction.guild.roles.cache.get(ROLE_ID);
+                if (!role) {
+                  interaction.reply({
+                    content: 'Role not found.',
+                    ephemeral: true
+                  });
+                }
+                if (targetMember.roles.cache.has(ROLE_ID)) {
+                    targetMember.roles.remove(role).catch(err => {console.log(err)});
+                  interaction.reply({
+                    content: `Removed the role ${role} from ${targetMember}.`,
+                    ephemeral: true
+                  });
+                } else {
+                  await targetMember.roles.add(role).catch(err => {console.log(err)});;
+                  interaction.reply({
+                    content: `Added the role ${role} to ${targetMember}.`,
+                    ephemeral: true
+                  });
+                }
+              } catch (error) {
+                //catch the error
+                console.log(error);
+                interaction.reply('An error occurred while processing the command.');
+            }
+        }
     }
+})
 
-});
 

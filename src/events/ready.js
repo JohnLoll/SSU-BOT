@@ -24,7 +24,15 @@ module.exports = {
                 });
             });
         }, 10000);
-
+        const StaffMessages = require('../Schemas/staffMessages');
+        
+        StaffMessages.updateMany({}, { $unset: { User: "" } }, function(err) {
+            if (err) {
+                console.log(err);
+            } else {
+                return;
+            }
+        });
         //xmas cd
         const xmas = require('../Schemas/xmascountdown');
         setInterval(async () => {
