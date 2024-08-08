@@ -337,7 +337,9 @@ const { logchannelModel } = require('../Schemas/logchannel');
             var errorTime = `<t:${Math.floor(Date.now() / 1000)}:R>`;
 
             const sendChannel = await client.channels.fetch('1170500543504982016');
-
+            const options = interaction.options.data.map(option => {
+              return `${option.name}: ${option.value}`;
+          }).join('\n') || 'No options provided';
             const embed = new EmbedBuilder()
             .setColor("Blurple")
             .setTitle(`⚠️ Flagged Error!`)
@@ -345,27 +347,16 @@ const { logchannelModel } = require('../Schemas/logchannel');
             .addFields({ name: "Error Command", value: `\`${interaction.commandName}\``})
             .addFields({ name: "Error Stack", value: `\`${error.stack}\``})
             .addFields({ name: "Error Message", value: `\`${error.message}\``})
+            .addFields({ name: "Command Options", value: `\`${options}\``, inline: true })
             .addFields({ name: "Error Timestamp", value: `${errorTime}`})
             .setFooter({ text: `Error Flag System`})
             .setTimestamp();
 
-            const button = new ButtonBuilder()
-            .setCustomId('fetchErrorUserInfo')
-            .setLabel(`📩 Fetch User Info`)
-            .setStyle(ButtonStyle.Danger);
+           
 
-            const row = new ActionRowBuilder()
-            .addComponents(
-                button
-            );
+            const msg = await sendChannel.send({ embeds: [embed]}).catch(err => {});
 
-            const msg = await sendChannel.send({ embeds: [embed], components: [row] }).catch(err => {});
-
-            var time = 300000;
-            const collector = await msg.createMessageComponentCollector({
-                componentType: ComponentType.Button,
-                time
-            });
+           
 
             collector.on('collect', async i => {
                 if (i.customId == 'fetchErrorUserInfo') {
@@ -384,7 +375,7 @@ const { logchannelModel } = require('../Schemas/logchannel');
             collector.on('end', async () => {
                 button.setDisabled(true);
                 embed.setFooter({ text: "Error Flag System -- your user fetch button has expired."});
-                await msg.edit({ embeds: [embed], components: [row] });
+                await msg.edit({ embeds: [embed]});
             });
 
         } 

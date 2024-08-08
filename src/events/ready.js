@@ -37,7 +37,7 @@ module.exports = {
 
 
         client.user.setActivity({
-            name: "24jjjj code",
+            name: "The SSU Barracks",
             type: ActivityType.Watching
         });
         client.user.setStatus('online');
