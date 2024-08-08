@@ -1,9 +1,9 @@
-const { ContextMenuCommandBuilder, ApplicationCommandType, SlashCommandBuilder,  EmbedBuilder} = require('discord.js');
+const { ContextMenuCommandBuilder, ApplicationCommandType, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../../Schemas/ep');
 
 const { google } = require('googleapis');
 const axios = require('axios');
-const your_channel_id = '1069723801916547123';
+const your_channel_id = '1258477692966408272';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,7 +24,7 @@ module.exports = {
     // Initialize variables for EP data
     let totalEps = 0;
     let weeklyEps = 0;
-   
+
     let userFound = false; // Initialize userFound to false
 
     // Determine the target user
@@ -84,7 +84,7 @@ module.exports = {
 
                 const joinDate = officer.joinedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-                // Fetching weekly event hosting data
+                // Fetching weekly event hosting data or mention count
                 const channel = interaction.guild.channels.cache.get(your_channel_id);
                 if (!channel) {
                   await interaction.editReply('Error: The specified channel does not exist.');
@@ -105,13 +105,29 @@ module.exports = {
 
                 if (!messages) return;
 
-                const eventMessages = messages.filter(msg => 
-                  msg.author.id === targetUser.id && 
-                  !msg.attachments.some(att => att.contentType && att.contentType.startsWith('image')) && 
-                  msg.createdAt >= startOfWeek
-                );
+                let weeklyEventsHosted = 0;
 
-                const weeklyEventsHosted = eventMessages.size;
+                // String of roles
+                const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1165022113095221358'; // Example role IDs
+                const rolesArray = rolesString.split(',');
+
+                // Check if the user has any of the roles in the array
+                const userHasRole = rolesArray.some(role => targetUser.roles.cache.has(role));
+
+                if (userHasRole) {
+                  const eventMessages = messages.filter(msg =>
+                    msg.author.id === targetUser.id &&
+                    !msg.attachments.some(att => att.contentType && att.contentType.startsWith('image')) &&
+                    msg.createdAt >= startOfWeek
+                  );
+                  weeklyEventsHosted = eventMessages.size;
+                } else {
+                  const mentionMessages = messages.filter(msg =>
+                    msg.mentions.has(targetUser.id) &&
+                    msg.createdAt >= startOfWeek
+                  );
+                  weeklyEventsHosted = mentionMessages.size;
+                }
 
                 const fields = [
                   { name: 'Username', value: officerNicknameWithoutTimezone, inline: true },
@@ -124,17 +140,11 @@ module.exports = {
                   { name: 'Total EP', value: totalEps, inline: true }
                 ];
 
-              // String of roles
-const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1232175887084949605'; // Example role IDs
-const rolesArray = rolesString.split(',');
-
-// Check if the user has any of the roles in the array
-const userHasRole = rolesArray.some(role => targetUser.roles.cache.has(role));
-
-if (userHasRole) {
-  fields.push({ name: 'Weekly Company Events Hosted', value: weeklyEventsHosted.toString(), inline: true });
-}
-
+                if (userHasRole) {
+                  fields.push({ name: 'Events Hosted This Week', value: weeklyEventsHosted.toString(), inline: true });
+                } else {
+                  fields.push({ name: 'Events Attended This Week', value: weeklyEventsHosted.toString(), inline: true });
+                }
 
                 console.log('Location: row', rIndex + 60, 'column', String.fromCharCode(65 + cIndex));
                 userFound = true;
@@ -179,9 +189,31 @@ if (userHasRole) {
           { name: 'Total EP', value: '0', inline: true }
         ];
 
-        // Only add the 'Weekly Company Events Hosted' field if the user has the specific role
-        if (targetUser.roles.cache.has('900476279164383242')) {
-          fields.push({ name: 'Weekly Company Events Hosted', value: '0', inline: true });
+        // Only add the 'Events Attended This Week' field if the user does not have any of the specific roles
+        const userHasRole = rolesArray.some(role => targetUser.roles.cache.has(role));
+        if (!userHasRole) {
+          // Fetch mentions count
+          const channel = interaction.guild.channels.cache.get(your_channel_id);
+          if (channel) {
+            const messages = await channel.messages.fetch({ limit: 100 }).catch(err => {
+              console.error('Error fetching messages:', err);
+              interaction.editReply('An error occurred while fetching messages from the channel.');
+              return;
+            });
+
+            if (messages) {
+              const startOfWeek = new Date();
+              startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+              const mentionMessages = messages.filter(msg =>
+                msg.mentions.has(targetUser.id) &&
+                msg.createdAt >= startOfWeek
+              );
+
+              const weeklyMentions = mentionMessages.size;
+              fields.push({ name: 'Events Attended This Week', value: weeklyMentions.toString(), inline: true });
+            }
+          }
         }
 
         // Create the user information embed
@@ -190,7 +222,7 @@ if (userHasRole) {
             title: `User Information | ${officerNicknameWithoutTimezone}`,
             color: 0x00FF00,
             fields: fields,
-            footer: { text: 'userinfo | Points Tracker' }, // Set your bot's name here
+            footer: { text: 'userinfo | SSU BOT' }, // Set your bot's name here
           }]
         });
       }
@@ -199,106 +231,5 @@ if (userHasRole) {
       await interaction.editReply('An error occurred while fetching EP data from Google Sheets.');
       return;
     }
-
-    // Fetching CEP data based on user's roles
-    const userRoles = targetUser.roles.cache;
-    let companyrole;
-    /*
-    for (const role of companyroleids) {
-      if (userRoles.some(targetRole => targetRole.id === role)) {
-        companyrole = role;
-        break;
-      }
-    }
-
-    if (companyrole in roleToSheetInfos) {
-      const { spreadsheetId, cepRange, totalnum, weeklynum, CompanyName } = roleToSheetInfos[companyrole];
-
-      try {
-        const res = await sheets.spreadsheets.values.get({
-          spreadsheetId,
-          range: cepRange,
-        });
-
-        const values = res.data.values;
-
-        if (values) {
-          userFound = false; // Reset userFound for CEP data search
-
-          for (let rIndex = 0; rIndex < values.length; rIndex++) {
-            const row = values[rIndex];
-            for (let cIndex = 0; cIndex < row.length; cIndex++) {
-              const currentNickname = row[cIndex];
-              const currentNicknameWithoutTimezone = currentNickname.replace(/\s*\[.*\]\s*$/, '');
-
-              if (currentNicknameWithoutTimezone) {
-                const cleanedCurrentNickname = currentNicknameWithoutTimezone.trim();
-                const officerNicknameLower = officerNicknameWithoutTimezone.trim().toLowerCase();
-
-                if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
-                  userFound = true;
-                  totalCeps = parseInt(row[cIndex + totalnum]);
-                  weeklyCeps = parseInt(row[cIndex + weeklynum]);
-                  console.log('User found in the original range');
-                  console.log('User\'s Total CEP:', totalCeps);
-                  console.log('User\'s Weekly CEP:', weeklyCeps);
-                  console.log('Location: row', rIndex + 60, 'column', String.fromCharCode(65 + cIndex));
-
-                  // Fetching Roblox data
-                  try {
-                    const robloxUsername = officerNicknameWithoutTimezone; // Assuming this gives the Roblox username
-                    const userIdResponse = await axios.post('https://users.roblox.com/v1/usernames/users', {
-                      usernames: [robloxUsername]
-                    });
-                    const robloxUserId = userIdResponse.data.data[0].id;
-                    const friendsCountResponse = await axios.get(`https://friends.roblox.com/v1/users/${robloxUserId}/friends/count`);
-                    const followersCountResponse = await axios.get(`https://friends.roblox.com/v1/users/${robloxUserId}/followers/count`);
-
-                    const friendsCount = friendsCountResponse.data.count || 'N/A';
-                    const followersCount = followersCountResponse.data.count || 'N/A';
-
-                    const joinDate = officer.joinedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-                    const fields = [
-                      { name: 'Username', value: officerNicknameWithoutTimezone, inline: true},
-                      { name: 'Roblox ID', value: robloxUserId, inline: true},
-                      { name: 'Discord', value: `<@${targetUser.id}>`, inline: true},
-                      { name: ' ', value: ` `, inline: false},
-                      { name: 'Statistics', value: `Friends: ${friendsCount}\nFollowers: ${followersCount}\nJoin Date: ${joinDate}\n \n`, inline: false},
-                      { name: ' ', value: ` `, inline: false},
-                      { name: 'Weekly EP', value: weeklyEps || 'N/A', inline: true},
-                      
-                      { name: 'Total EP', value: totalEps || 'N/A', inline: true},
-                     
-                    ];
-
-                    // Create the user information embed
-                    await interaction.editReply({
-                      embeds: [{
-                        title: `User Information | ${officerNicknameWithoutTimezone}`,
-                        color: 0x00FF00,
-                        fields: fields,
-                        footer: { text: 'userinfo | Points Tracker' }, // Set your bot's name here
-                      }]
-                    });
-                  } catch (robloxErr) {
-                    console.error('Error fetching Roblox data:', robloxErr);
-                    await interaction.editReply('An error occurred while fetching Roblox data.');
-                  }
-                }
-              }
-            }
-          }
-
-          if (!userFound) {
-            await interaction.editReply('User not found in the CEP data.');
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching CEP data from Google Sheets:', err);
-        await interaction.editReply('An error occurred while fetching CEP data from Google Sheets.');
-      }
-    } else {
-      await interaction.editReply('User not found in a Company');
-    } */
   }
 };

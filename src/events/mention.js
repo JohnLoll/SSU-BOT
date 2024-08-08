@@ -5,7 +5,7 @@ module.exports = {
     async execute (message, client) {
 
         if (message.author.bot) return;
-/*
+
         async function sendMessage(reply) {
             const embed = new EmbedBuilder()
             .setColor("Blurple")
@@ -43,6 +43,6 @@ module.exports = {
                 await sendMessage();
             }
         }
-        */
+        
     }
 }

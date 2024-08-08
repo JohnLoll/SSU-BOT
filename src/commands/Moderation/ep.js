@@ -10,7 +10,7 @@ module.exports = {
     .addStringOption(option => option.setName('range').setDescription('The range for the EP spreedsheet.').setRequired(true))
     .addIntegerOption(option => option.setName('start').setDescription('The row the sheet starts at.').setRequired(true))
     .addIntegerOption(option => option.setName('trooperstart').setDescription('The row where the trooper section starts.').setRequired(true))
-    .addStringOption(option => option.setName('trooperrange').setDescription('The Trooper range for the EP spreedsheet.').setRequired(true))
+    .addStringOption(option => option.setName('trooperrange').setDescription('The range for the EP spreedsheet.').setRequired(true))
     .addIntegerOption(option => option.setName('weeklyoffset').setDescription('The offset for the weekly cepModel.').setRequired(true))
     .addIntegerOption(option => option.setName('totaloffset').setDescription('The offset for the total cepModel.').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove the Ep sheet config from the database'))
@@ -39,7 +39,7 @@ module.exports = {
             var weeklyoffset = options.getInteger('weeklyoffset');
             var totaloffset = options.getInteger('totaloffset');
             var trooperstart = options.getInteger('trooperstart');
-            var trooperrange = options.getInteger('trooperrange');
+            var trooperrange = options.getString('trooperrange');
 
 
             await data.forEach(async value => {
@@ -69,7 +69,7 @@ module.exports = {
                 var weeklyoffset = options.getInteger('weeklyoffset');
                 var totaloffset = options.getInteger('totaloffset');
                 var trooperstart = options.getInteger('trooperstart');
-                var trooperrange = options.getInteger('trooperrange');
+                var trooperrange = options.getString('trooperrange');
                 if (check) {
                     return await sendMessage(`⚠️ Looks like that is already a companys name!`);
                 } else {

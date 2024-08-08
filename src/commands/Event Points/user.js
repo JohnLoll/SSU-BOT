@@ -168,7 +168,7 @@ module.exports = {
               
                       // Update spreadsheet with modified values
                       await sheets.spreadsheets.values.update({
-                        spreadsheetId,
+                        spreadsheetId: Sheetid,
                         range: `${startColumn}${newRowIndex + startRow}:${endColumn}${newRowIndex + startRow}`, // Change only the row index
                         valueInputOption: 'USER_ENTERED',
                         resource: { values: [newRow] }, // Use the modified newRow here
@@ -180,15 +180,15 @@ module.exports = {
               
                   if (foundEmptyRow) {
                     // Respond to the interaction
-                  interaction.channel.send(`Added ${officerNickname} to the EP Sheet.`);
-                  } else {
+                    interaction.channel.send(`Added ${officerNickname} to the EP Sheet.`);
+                } else {
                     interaction.channel.send(`No empty row found in the EP Sheet range.`);
-                  }
-                } catch (error) {
-                  console.error(`Error adding user to EP Sheet`, error);
-                  interaction.channel.send(`Error adding user to EP Sheet`, error);
-                  throw error;
                 }
+            } catch (error) {
+                console.error(`Error adding user to EP Sheet`, error);
+                interaction.channel.send(`Error adding user to EP Sheet`, error);
+                throw error;
+            }
               }
 
               async function RemoveUser(interaction, spreadsheetId, officerNickname) {

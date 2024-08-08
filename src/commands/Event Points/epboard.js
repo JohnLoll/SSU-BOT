@@ -87,7 +87,7 @@ module.exports = {
             const description = `**Top Weekly EP Users:**\n${topWeeklyEpUsers}\n\n**Top Total EP Users:**\n${topTotalEpUsers}`;
 
             embed.setDescription(description)
-                .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() });
+            .setFooter({ text: `epboard | SSU Bot` });
 
             // Send response
             if (!interaction.replied) {
