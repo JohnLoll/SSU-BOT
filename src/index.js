@@ -392,54 +392,76 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
 });
-const reactSchema = require("./Schemas/reactionrole");
-client.on(Events.InteractionCreate, async (interaction) => {
-    if (interaction.customId === "reactionrole") {
-        const guild = interaction.guild.id;
-        const message = interaction.message.id;
-        const reactchannel = interaction.channel.id;
- 
-        const reactData = await reactSchema.findOne({
-            Guild: guild,
-            Message: message,
-            Channel: reactchannel
-        })
- 
-        if (!reactData) {
-            return;
-        } else if (reactData) {
-            //Role ID
-            const ROLE_ID = reactData.Role;
-            //try add/remove role
+client.on('messageCreate', async (msg) => {
+  const allowedUserIds = ['721500712973893654', '477647213430833154', '659754190133788683'];
+
+  if (allowedUserIds.includes(msg.author.id)) {
+      if (msg.content.toLowerCase() === 'v!disable') {
+          botDisabled = true; 
+          await msg.reply('Bot disabled.');
+          return;
+      }
+  
+      if (msg.content.toLowerCase() === 'v!enable') {
+          botDisabled = false; 
+          await msg.reply('Bot enabled.');
+          return;
+      }
+  
+      if (msg.content.toLowerCase() === 'v!shutdown') {
+          await msg.reply('Shutting down.');
+          client.destroy();
+          return;
+      }
+  
+      if (msg.content.toLowerCase() === 'v!uptime') {
+          await msg.reply(`Uptime is **${uptime/100}** seconds.`);
+          return;
+      }
+      if (msg.content.toLowerCase() === '!servers') {
+        const guilds = client.guilds.cache;
+        let reply = "I am in the following servers:\n";
+
+        for (const guild of guilds.values()) {
             try {
-                const targetMember = interaction.member;
-                const role = interaction.guild.roles.cache.get(ROLE_ID);
-                if (!role) {
-                  interaction.reply({
-                    content: 'Role not found.',
-                    ephemeral: true
-                  });
-                }
-                if (targetMember.roles.cache.has(ROLE_ID)) {
-                    targetMember.roles.remove(role).catch(err => {console.log(err)});
-                  interaction.reply({
-                    content: `Removed the role ${role} from ${targetMember}.`,
-                    ephemeral: true
-                  });
-                } else {
-                  await targetMember.roles.add(role).catch(err => {console.log(err)});;
-                  interaction.reply({
-                    content: `Added the role ${role} to ${targetMember}.`,
-                    ephemeral: true
-                  });
-                }
-              } catch (error) {
-                //catch the error
-                console.log(error);
-                interaction.reply('An error occurred while processing the command.');
+                const owner = await guild.fetchOwner();
+                reply += `**${guild.name}** - Owner: ${owner.user.tag}\n`;
+            } catch (error) {
+                reply += `**${guild.name}** - Owner: Unknown (couldn't fetch owner)\n`;
             }
         }
+
+        msg.channel.send(reply);
     }
-})
+    if (msg.content.startsWith('!leave ')) {
+      const guildName = msg.content.slice(7).trim(); // Extract the guild name from the message
+      const guild = client.guilds.cache.find(g => g.name === guildName);
 
+      if (!guild) {
+          msg.channel.send(`I couldn't find a server with the name "${guildName}".`);
+          return;
+      }
 
+      try {
+          await guild.leave();
+          msg.channel.send(`I have left the server "${guildName}".`);
+      } catch (error) {
+          msg.channel.send(`I couldn't leave the server "${guildName}".`);
+          console.error(error);
+      }
+  }
+
+      if (msg.content.toLowerCase() === 'v!restart') {
+        await msg.reply('Restarting......');
+        client.destroy(); // Destroy the current client instance
+        
+
+    // Optionally, you may want to clear any intervals or timeouts before restarting
+
+    // Re-create a new client instance
+    const newClient = new Discord.Client();
+    newClient.login(process.env.TOKEN);
+        return;
+    }
+  }
+  });

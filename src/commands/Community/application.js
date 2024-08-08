@@ -7,7 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('applications-setup')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .setDescription('Create an applications system.')
+    .setDescription('Create an application system.')
     .addChannelOption((option) =>
     option
       .setName('channel')
@@ -42,7 +42,7 @@ module.exports = {
       .setDescription('Choose a style, so choose a emoji.')
       .setRequired(true)
       )
-      .addStringOption(option => option.setName('duration').setDescription('Select the length of time the member cannot apply for staff.').setRequired(true).addChoices(
+      .addStringOption(option => option.setName('duration').setDescription('Select the length of time the member cannot apply for a department.').setRequired(true).addChoices(
         { name: '60 Seconds', value: '60s' },
         { name: '2 Minutes', value: '2m' },
         { name: '5 Minutes', value: '5m' },

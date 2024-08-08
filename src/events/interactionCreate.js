@@ -3,8 +3,7 @@ const Discord = require('discord.js');
 const block = require('../Schemas/blockcmd');
 const modrole = require('../Schemas/modrole');
 const officerrole = require('../Schemas/officerrole');
-const companyrole = require('../Schemas/companyrole');
-const companyhicom = require('../Schemas/companyhicom');
+
 const ownerid = '721500712973893654'
 module.exports = {
     name: 'interactionCreate',
@@ -308,60 +307,6 @@ const { logchannelModel } = require('../Schemas/logchannel');
                 return await interaction.reply({ content: `⚠️ An error occurred while checking roles. Please try again later.`, ephemeral: true });
             }
         }
-//company role
-if (command.company) {
-    var companyRoleData = await companyrole.find({ Guild: interaction.guild.id, Name: interaction.options.getString('company') });
-    
-    if (companyRoleData.length > 0) {
-        var userHasCompanyRole = false;
-        
-        // Iterate through each company role configuration
-        for (const value of companyRoleData) {
-            // Iterate through the user's roles
-            for (const userRole of interaction.member.roles.cache.values()) {
-                // Check if the user has a role that matches any role in the company's role array
-                if (value.Role.includes(userRole.id)) {
-                    userHasCompanyRole = true;
-                    break; // Exit the loop if a match is found
-                }
-            }
-            if (userHasCompanyRole) {
-                break; // Exit the loop if a match is found
-            }
-        }
-
-        if (!userHasCompanyRole) {
-            return await interaction.reply({ content: `⚠️ Only **Company members** can use this command for the specified company!`, ephemeral: true });
-        }
-    }
-}
-//Company Hicom
-if (command.companyhicom) {
-    var companyHicomData = await companyrole.find({ Guild: interaction.guild.id, Name: interaction.options.getString('company') });
-    
-    if (companyHicomData.length > 0) {
-        var userHasCompanyHicom = false;
-        
-        // Iterate through each company role configuration
-        for (const value of companyHicomData) {
-            // Iterate through the user's roles
-            for (const userRole of interaction.member.roles.cache.values()) {
-                // Check if the user has a role that matches any role in the company's role array
-                if (value.Role.includes(userRole.id)) {
-                    userHasCompanyHicom = true;
-                    break; // Exit the loop if a match is found
-                }
-            }
-            if (userHasCompanyHicom) {
-                break; // Exit the loop if a match is found
-            }
-        }
-
-        if (!userHasCompanyHicom) {
-            return await interaction.reply({ content: `⚠️ Only **Company Hicom** can use this command!`, ephemeral: true });
-        }
-    }
-}
 
             if (match.length > 0) {
                 return await interaction.reply({ content: `⚠️ Sorry! Looks like the server has this command **blocked from use!**`, ephemeral: true });
