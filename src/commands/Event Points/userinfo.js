@@ -3,7 +3,7 @@ let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset } = requir
 
 const { google } = require('googleapis');
 const axios = require('axios');
-const your_channel_id = '1258477692966408272';
+const your_channel_id = '1069723801916547123';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -108,7 +108,7 @@ module.exports = {
                 let weeklyEventsHosted = 0;
 
                 // String of roles
-                const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1165022113095221358'; // Example role IDs
+                const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1232175887084949605'; // Example role IDs
                 const rolesArray = rolesString.split(',');
 
                 // Check if the user has any of the roles in the array
