@@ -34,189 +34,222 @@ module.exports = {
             }
         }
         if (interaction.customId) {
-            let staffmember = null;
-            let { epModel, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../Schemas/ep');
-let logchannel = null;
-const { logchannelModel } = require('../Schemas/logchannel');
-            if (interaction.customId.includes("approved - ")) {
-                var stringId = interaction.customId;
-                stringId = stringId.replace("approved - ", "");
-        
-                var member = await client.users.fetch(stringId);
-                
-                // Fetch the guild member to get the nickname
-                var guild = await client.guilds.fetch('1069439785984344096');
-                var guildMember = await guild.members.fetch(stringId);
-        staffmember = interaction.user.id
-                console.log(`User's nickname in the server: ${guildMember.nickname || guildMember.user.username}`);
-                var logdata = await logchannelModel.find({ Guild: interaction.guild.id});
-      var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });
-      var values = [];
-                  await data.forEach(async value => {
-                      if (!value.Name) return;
-                      else {
-                         
-                          values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
-                      }
-                  });
-                  var logvalues = [];
-                  await logdata.forEach(async value => {
-                      if (!value.Channel) return;
-                      else {
-                         
-                          logvalues.push(logchannel = value.Channel);
-                      }
-                  });
-  
-   
-   
-                const amountToAdd = 1;
-                await addep(guildMember.nickname, amountToAdd)
-                function getColumnLetter(columnIndex) {
-                    let letter = '';
-                  
-                    while (columnIndex >= 0) {
-                      const remainder = columnIndex % 26;
-                      letter = String.fromCharCode(65 + remainder) + letter;
-                      columnIndex = Math.floor(columnIndex / 26) - 1;
-                    }
-                  
-                    return letter;
-                  }
-                async function addep(officerNickname, amountToAdd){
-                  try {
-                   
-                
-                    const { google } = require('googleapis');
-                    
-                      const range = Range;
-                      const auth = new google.auth.GoogleAuth({
-                        keyFile: 'credentials.json', // Use your credentials file
-                        scopes: 'https://www.googleapis.com/auth/spreadsheets',
-                      });
-                      const sheets = google.sheets({ version: 'v4', auth });
-                      const res = await sheets.spreadsheets.values.get({
-                        spreadsheetId : Sheetid,
-                        range,
-                      });
-                
-                      const values = res.data.values;
-                
-                      if (values) {
-                        let rowIndex;
-                        let found = false;
-                        let modifiedCells = [];
-                
-                        for (let rIndex = 0; rIndex < values.length; rIndex++) {
-                          rowIndex = rIndex;
-                
-                          const row = values[rIndex];
-                
-                          for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
-                            const currentNickname = row[columnIndex];
-                
-                            if (currentNickname) {
-                            const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
-                            const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
-                
-                            if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
-                              const weeklyPointsColumn = columnIndex + Weeklyoffset;
-                              const totalPointsColumn = columnIndex + Totaloffset;
-                
-                              const currentWeeklyPoints = parseInt(values[rowIndex][weeklyPointsColumn]);
-                              const currentTotalPoints = parseInt(values[rowIndex][totalPointsColumn]);
-                
-                              const newWeeklyPoints = currentWeeklyPoints + amountToAdd;
-                              const newTotalPoints = currentTotalPoints + amountToAdd;
-                
-                              values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
-                              values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
-                
-                              const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 1);
-                              const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
+          let staffmember = null;
+          
+         
+          
+          if (interaction.customId.includes("approved - ")) {
+              var stringId = interaction.customId.replace("approved - ", "");
+              var member = await client.users.fetch(stringId);
               
-                              modifiedCells.push({
-                                range: `${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`,
-                                values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
-                              });
-                              
-              console.log(`${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`);
-                              found = true;
-                              break;
-                            }
+              // Fetch the guild member to get the nickname
+              var guild = await client.guilds.fetch('1069439785984344096');
+              var guildMember = await guild.members.fetch(stringId);
+             
+      
+              
+            
+              
+            
+           
+              // Present the user with EP options
+              const row = new ActionRowBuilder()
+                  .addComponents(
+                      new ButtonBuilder()
+                          .setCustomId(`ep-1-${stringId}`)
+                          .setLabel('1 EP')
+                          .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                          .setCustomId(`ep-2-${stringId}`)
+                          .setLabel('2 EP')
+                          .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                          .setCustomId(`ep-4-${stringId}`)
+                          .setLabel('4 EP')
+                          .setStyle(ButtonStyle.Primary),
+                      new ButtonBuilder()
+                          .setCustomId(`ep-6-${stringId}`)
+                          .setLabel('6 EP')
+                          .setStyle(ButtonStyle.Primary)
+                  );
+              
+              await interaction.reply({ content: 'Please select the EP to award:', components: [row], ephemeral: true });
+          } else if (interaction.customId.startsWith('ep-')) {
+              const [_, amountToAdd, stringId] = interaction.customId.split('-');
+              var member = await client.users.fetch(stringId);
+              var guild = await client.guilds.fetch('1069439785984344096');
+              var guildMember = await guild.members.fetch(stringId);
+      
+              const officerNickname = guildMember.nickname || guildMember.user.username;
+      
+              await addep(officerNickname, parseInt(amountToAdd));
+      
+              async function addep(officerNickname, amountToAdd){
+                function getColumnLetter(columnIndex) {
+                  let letter = '';
+                
+                  while (columnIndex >= 0) {
+                    const remainder = columnIndex % 26;
+                    letter = String.fromCharCode(65 + remainder) + letter;
+                    columnIndex = Math.floor(columnIndex / 26) - 1;
+                  }
+                
+                  return letter;
+                }
+                let { epModel, Sheetid, Range, Weeklyoffset, Totaloffset } = require('../Schemas/ep');
+                var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });
+               var values = [];
+                await data.forEach(async value => {
+                    if (!value.Name) return;
+                    else {
+                       
+                        values.push(Sheetid = value.Sheetid,Range =  value.Range, Weeklyoffset = value.Weeklyoffset, Totaloffset = value.Totaloffset);
+                    }
+                });
+                try {
+                 
+              
+                  const { google } = require('googleapis');
+                  
+                    const range = Range;
+                    const auth = new google.auth.GoogleAuth({
+                      keyFile: 'credentials.json', // Use your credentials file
+                      scopes: 'https://www.googleapis.com/auth/spreadsheets',
+                    });
+                    const sheets = google.sheets({ version: 'v4', auth });
+                    const res = await sheets.spreadsheets.values.get({
+                      spreadsheetId : Sheetid,
+                      range,
+                    });
+              
+                    const values = res.data.values;
+              
+                    if (values) {
+                      let rowIndex;
+                      let found = false;
+                      let modifiedCells = [];
+              
+                      for (let rIndex = 0; rIndex < values.length; rIndex++) {
+                        rowIndex = rIndex;
+              
+                        const row = values[rIndex];
+              
+                        for (let columnIndex = 0; columnIndex < row.length; columnIndex++) {
+                          const currentNickname = row[columnIndex];
+              
+                          if (currentNickname) {
+                          const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
+                          const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+              
+                          if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
+                            const weeklyPointsColumn = columnIndex + Weeklyoffset;
+                            const totalPointsColumn = columnIndex + Totaloffset;
+              
+                            const currentWeeklyPoints = parseInt(values[rowIndex][weeklyPointsColumn]);
+                            const currentTotalPoints = parseInt(values[rowIndex][totalPointsColumn]);
+              
+                            const newWeeklyPoints = currentWeeklyPoints + amountToAdd;
+                            const newTotalPoints = currentTotalPoints + amountToAdd;
+              
+                            values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
+                            values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
+              
+                            const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 1);
+                            const totalColumnLetter = getColumnLetter(totalPointsColumn + 2);
+            
+                            modifiedCells.push({
+                              range: `${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`,
+                              values: [[newWeeklyPoints.toString(), newTotalPoints.toString()]],
+                            });
+                            
+            console.log(`${weeklyColumnLetter}${rowIndex + 6}:${totalColumnLetter}${rowIndex + 6}`);
+                            found = true;
+                            break;
                           }
                         }
-              
-                        if (found) {
-                          break;
-                        }
                       }
-                        if (found) {
-                          // Update only the modified cells
-                          await sheets.spreadsheets.values.batchUpdate({
-                            spreadsheetId: Sheetid,
-                            resource: {
-                              data: modifiedCells,
-                              valueInputOption: 'USER_ENTERED',
-                            },
-                          });
-                        } else {
-                          console.log(`User with Discord nickname "${officerNickname}" not found in the spreadsheet.`);
-                          //interaction.channel.send(`User with Discord nickname "${officerNickname}" not found in the range: ${range}`);
-                          return;
-                        }
+            
+                      if (found) {
+                        break;
+                      }
+                    }
+                      if (found) {
+                        // Update only the modified cells
+                        await sheets.spreadsheets.values.batchUpdate({
+                          spreadsheetId: Sheetid,
+                          resource: {
+                            data: modifiedCells,
+                            valueInputOption: 'USER_ENTERED',
+                          },
+                        });
                       } else {
-                        console.log('Spreadsheet data not found.');
+                        console.log(`User with Discord nickname "${officerNickname}" not found in the spreadsheet.`);
+                        //interaction.channel.send(`User with Discord nickname "${officerNickname}" not found in the range: ${range}`);
+                        return;
                       }
-                    
-                  } catch (error) {
-                    console.error('Error adding points to the spreadsheet:', error);
-                  }
-                  console.log(`Added **${amountToAdd}** event points to ${officerNickname}`);
-                  //interaction.channel.send(`Added **${amountToAdd}** Event Points to ${officerNickname}`);
-                  const guilds =interaction.guild
+                    } else {
+                      console.log('Spreadsheet data not found.');
+                    }
+                  
+                } catch (error) {
+                  console.error('Error adding points to the spreadsheet:', error);
+                }
+                console.log(`Added **${amountToAdd}** event points to ${officerNickname}`);
+                //interaction.channel.send(`Added **${amountToAdd}** Event Points to ${officerNickname}`);
+                await member.send(`✅ Your guarding log has been APPROVED. You received ${amountToAdd} Event Points for guarding.`).catch(err => {});
+                let logchannel = null;
+                const { logchannelModel } = require('../Schemas/logchannel');
+                var logdata = await logchannelModel.find({ Guild: interaction.guild.id });
+                var logvalues = [];
+                await logdata.forEach(async value => {
+                    if (value.Channel) {
+                        logvalues.push(logchannel = value.Channel);
+                    }
+                });
+                staffmember = interaction.user.id;
+                const guilds =interaction.guild
        
      
-                  const logEmbed = {
-                    color: 0xff0000, // Red color
-                    title: 'Guard Log Approved',
-                    description: 'Guard Log Approved',
-                    fields: [
-                      {
-                        name: 'Staff Memnber',
-                        value: `<@${staffmember}>`,
-                        inline: true,
-                      },
-                      {
-                        name: 'Users Affected',
-                        value: `<@${stringId}>`,
-                        inline: true,
-                      },
-                      {
-                        name: 'Amount Added',
-                        value: `1`,
-                        inline: true,
-                      },
-                    ],
-                    footer: {
-                      text: 'Command executed',
+                const logEmbed = {
+                  color: 0xff0000, // Red color
+                  title: 'Guard Log Approved',
+                  description: 'Guard Log Approved',
+                  fields: [
+                    {
+                      name: 'Staff Memnber',
+                      value: `<@${staffmember}>`,
+                      inline: true,
                     },
-                    timestamp: new Date(),
-                  };
-                  
-                      // Send the log message to the log channel
-                       const logChannel = guilds.channels.cache.get(logchannel);
-                      if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
-                        await logChannel.send({ embeds: [logEmbed] });
-                      }
-                }
-            
-                await member.send(`✅ Your guarding log that you requested has been APPROVED. You received 1 Event Point for guarding.`).catch(err => {});
-                await interaction.reply({ content: `🌍 I have notified the member that their guard log is approved.`, ephemeral: true });
-                await interaction.message.delete().catch(err => {});
-            }
- 
-        }
+                    {
+                      name: 'Users Affected',
+                      value: `<@${stringId}>`,
+                      inline: true,
+                    },
+                    {
+                      name: 'Amount Added',
+                      value: `1`,
+                      inline: true,
+                    },
+                  ],
+                  footer: {
+                    text: 'Command executed',
+                  },
+                  timestamp: new Date(),
+                };
+                
+                    // Send the log message to the log channel
+                     const logChannel = guilds.channels.cache.get(logchannel);
+                    if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+                      await logChannel.send({ embeds: [logEmbed] });
+                    }
+                 await interaction.reply({ content: `🌍 I have notified the member that their guard log is approved.`, ephemeral: true });
+              await interaction.message.delete().catch(err => {});
+                
+              }
+      
+              
+          }
+      }
         
         if (!interaction.isCommand()) return;
 
