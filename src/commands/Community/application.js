@@ -134,7 +134,8 @@ module.exports = {
     option
       .setName('moderator-role')
       .setDescription('The role that will be pinged when an application gets sent thru.')
-      ),
+      )
+      .setDMPermission(false),
     async execute(interaction, client) {
       const ownerid = '721500712973893654'
       if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {

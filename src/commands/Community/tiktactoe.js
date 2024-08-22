@@ -5,7 +5,8 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('tic-tac-toe')
     .setDescription('Play a game of Tic Tac Toe!')
-    .addUserOption(option => option.setName('user').setDescription('User to play Tic Tac Toe with!').setRequired(true)),
+    .addUserOption(option => option.setName('user').setDescription('User to play Tic Tac Toe with!').setRequired(true))
+    .setDMPermission(false),
     async execute (interaction) {
         const Game = new TicTacToe({
         message: interaction,

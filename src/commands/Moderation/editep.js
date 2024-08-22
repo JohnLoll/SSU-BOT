@@ -4,7 +4,8 @@ let { epModel, Name, Guild, Sheetid, Range, Weeklyoffset, Totaloffset } = requir
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('edit-ep-config')
-    .setDescription(`Edit EP Configuration'`),
+    .setDescription(`Edit EP Configuration'`)
+    .setDMPermission(false),
     async execute (interaction) {
         var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });
         var values = [];

@@ -3,7 +3,8 @@ const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Act
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('bug-report')
-    .setDescription(`Send a bug report to the bot devs!`),
+    .setDescription(`Send a bug report to the bot devs!`)
+    .setDMPermission(false),
     async execute (interaction) {
 
         if (!interaction.guild) return await interaction.reply({ content: `⚠️ Please report this bug within a guild`, ephemeral: true });

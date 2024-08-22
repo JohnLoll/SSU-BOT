@@ -7,7 +7,8 @@ module.exports = {
     .setDescription('officer role')
     .addSubcommand(command => command.setName('add').setDescription('Add a officer role to the database').addRoleOption(option => option.setName('role').setDescription('The officer role to add').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove a role from the officer role database').addRoleOption(option => option.setName('role').setDescription('The role to remove').setRequired(true)))
-    .addSubcommand(command => command.setName('check').setDescription('Check the officer role(s)')),
+    .addSubcommand(command => command.setName('check').setDescription('Check the officer role(s)'))
+    .setDMPermission(false),
     async execute (interaction) {
 
         const { options } = interaction;

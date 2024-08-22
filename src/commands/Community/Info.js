@@ -9,7 +9,8 @@ module.exports = {
     .addSubcommand(command => command.setName('stats').setDescription('Shows some basic statistics about YourBot.'))
     .addSubcommand(command => command.setName('specs').setDescription('Shows the specifications that YourBot uses.'))
     .addSubcommand(command => command.setName('ping').setDescription(`Displays the bot's ping... Pong.. PANG!!`))
-    .addSubcommand(command => command.setName('online').setDescription(`Shows the online status of YourBot, a great way to see if our bot works!`)),
+    .addSubcommand(command => command.setName('online').setDescription(`Shows the online status of YourBot, a great way to see if our bot works!`))
+    .setDMPermission(false),
     async execute(interaction, client) {
  const avatar = interaction.guild.iconURL()
         const sub = interaction.options.getSubcommand();

@@ -14,7 +14,8 @@ module.exports = {
     .addIntegerOption(option => option.setName('weeklyoffset').setDescription('The offset for the weekly cepModel.').setRequired(true))
     .addIntegerOption(option => option.setName('totaloffset').setDescription('The offset for the total cepModel.').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove the Ep sheet config from the database'))
-    .addSubcommand(command => command.setName('check').setDescription('Check the EP config.')),
+    .addSubcommand(command => command.setName('check').setDescription('Check the EP config.'))
+    .setDMPermission(false),
     
     async execute (interaction) {
 

@@ -8,7 +8,8 @@ module.exports = {
     .addSubcommand(command => command.setName('set').setDescription('Block a command from being used in this server').addStringOption(option => option.setName('command').setDescription('The command to block').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Unblock a command').addStringOption(command => command.setName('command').setDescription('The command to unblock').setRequired(true)))
     .addSubcommand(command => command.setName('reset').setDescription('Reset the commands back to default'))
-    .addSubcommand(command => command.setName('check').setDescription('Check the blocked commands')),
+    .addSubcommand(command => command.setName('check').setDescription('Check the blocked commands'))
+    .setDMPermission(false),
     async execute (interaction, client) {
 
         const { options } = interaction;

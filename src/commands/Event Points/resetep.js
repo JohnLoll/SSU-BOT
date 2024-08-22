@@ -9,7 +9,8 @@ module.exports = {
     officer: true,
     data: new SlashCommandBuilder()
         .setName('resetep')
-        .setDescription('Resets the weekly EP.'),
+        .setDescription('Resets the weekly EP.')
+        .setDMPermission(false),
     async execute(interaction) {
         var logdata = await logchannelModel.find({ Guild: interaction.guild.id });
         var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });

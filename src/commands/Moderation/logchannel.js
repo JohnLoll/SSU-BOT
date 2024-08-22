@@ -8,7 +8,8 @@ module.exports = {
     .addSubcommand(command => command.setName('add').setDescription('Add a log channel to the database')
     .addChannelOption(option => option.setName('channel').setDescription('The log channel').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove the log channel from the database'))
-    .addSubcommand(command => command.setName('check').setDescription('Check the log channel')),
+    .addSubcommand(command => command.setName('check').setDescription('Check the log channel'))
+    .setDMPermission(false),
     
     async execute (interaction) {
 

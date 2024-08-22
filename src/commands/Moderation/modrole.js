@@ -7,7 +7,8 @@ module.exports = {
     .setDescription('Mod role')
     .addSubcommand(command => command.setName('add').setDescription('Add a mod role to the database').addRoleOption(option => option.setName('role').setDescription('The mod role to add').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove a role from the mod role database').addRoleOption(option => option.setName('role').setDescription('The role to remove').setRequired(true)))
-    .addSubcommand(command => command.setName('check').setDescription('Check the mod role(s)')),
+    .addSubcommand(command => command.setName('check').setDescription('Check the mod role(s)'))
+    .setDMPermission(false),
     async execute (interaction) {
 
         const { options } = interaction;

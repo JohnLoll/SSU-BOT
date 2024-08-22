@@ -5,7 +5,8 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('check-ep')
         .setDescription('Check the amount of EP a user has.')
-        .addUserOption(option => option.setName('target').setDescription('The user')),
+        .addUserOption(option => option.setName('target').setDescription('The user'))
+        .setDMPermission(false),
 
     async execute(interaction) {
         var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });

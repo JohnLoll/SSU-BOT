@@ -5,7 +5,8 @@ const { google } = require('googleapis');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('epboard')
-        .setDescription('The top weekly and total EP users!'),
+        .setDescription('The top weekly and total EP users!')
+        .setDMPermission(false),
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
         

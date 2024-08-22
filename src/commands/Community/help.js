@@ -7,7 +7,8 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
   data: new SlashCommandBuilder()
 		.setName('help')
-		.setDescription('List of commands'),
+		.setDescription('List of commands')
+    .setDMPermission(false),
   async execute(interaction) {
     await interaction.deferReply({ ephemeral: true });
    

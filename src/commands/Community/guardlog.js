@@ -5,7 +5,8 @@ const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, Act
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('guard-log')
-    .setDescription(`Send a guard log request!`),
+    .setDescription(`Send a guard log request!`)
+    .setDMPermission(false),
     async execute (interaction) {
 
         if (!interaction.guild) return await interaction.reply({ content: `⚠️ Please send a guard log request within a guild`, ephemeral: true });

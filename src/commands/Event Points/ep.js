@@ -34,7 +34,8 @@ module.exports = {
                 .addStringOption(option =>
                   option.setName('user')
                   .setDescription('The user to add/remove EP from.')
-                  .setRequired(true)),
+                  .setRequired(true))
+                  .setDMPermission(false),
           
     async execute(interaction) {
       interaction.reply('Please wait...');

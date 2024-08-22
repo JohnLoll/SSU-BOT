@@ -9,7 +9,8 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('userinfo')
     .setDescription('View the user\'s information.')
-    .addUserOption(option => option.setName('user').setDescription('The user to get the info of.').setRequired(false)),
+    .addUserOption(option => option.setName('user').setDescription('The user to get the info of.').setRequired(false))
+    .setDMPermission(false),
   async execute(interaction) {
     // Fetch EP data settings from your database
     var data = await epModel.find({ Guild: interaction.guild.id, Name: 'EP' });
@@ -155,7 +156,7 @@ module.exports = {
                     title: `User Information | ${officerNicknameWithoutTimezone}`,
                     color: 0x00FF00,
                     fields: fields,
-                    footer: { text: 'userinfo | Points Tracker' }, // Set your bot's name here
+                    footer: { text: 'userinfo | SSU Bot' }, // Set your bot's name here
                   }]
                 });
               }

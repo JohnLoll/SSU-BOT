@@ -5,7 +5,8 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('rock-paper-scissors')
     .setDescription('Play a game of rock paper scissors')
-    .addUserOption(option => option.setName('opponent').setDescription('The person to play against').setRequired(true)),
+    .addUserOption(option => option.setName('opponent').setDescription('The person to play against').setRequired(true))
+    .setDMPermission(false),
     async execute (interaction) {
 
         const { options } = interaction;

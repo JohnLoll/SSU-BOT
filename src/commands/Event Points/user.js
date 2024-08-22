@@ -24,7 +24,8 @@ module.exports = {
             .addStringOption(option =>
               option.setName('user')
               .setDescription('The user to add/remove from the EP sheet.')
-              .setRequired(true)),
+              .setRequired(true))
+              .setDMPermission(false),
   async execute(interaction) {
     interaction.reply('Please wait...');
     var logdata = await logchannelModel.find({ Guild: interaction.guild.id});
