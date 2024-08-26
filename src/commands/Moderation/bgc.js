@@ -186,7 +186,7 @@ const calculateExpectedValues = (accountAge) => {
     };
 };
 
-
+/*
 const assessAccount = (accountDetails, metrics, garBadgePage) => {
     const { accountAge, clothingCount, accessoryCount, gamepassCount, badgeCount, groupCount } = metrics;
     const { expectedClothing, expectedAccessories, expectedGamePasses, expectedBadges, expectedGroups } = calculateExpectedValues(accountAge);
@@ -225,7 +225,7 @@ const assessAccount = (accountDetails, metrics, garBadgePage) => {
     return score;
 };
 
-/*
+*/
 const assessAccount = (accountDetails, metrics) => {
     const { accountAge, clothingCount, accessoryCount, gamepassCount, badgeCount, groupCount } = metrics;
     const { expectedClothing, expectedAccessories, expectedGamePasses, expectedBadges, expectedGroups } = calculateExpectedValues(accountAge);
@@ -260,7 +260,7 @@ const assessAccount = (accountDetails, metrics) => {
 
     return score;
 };
-*/
+
 
 
 
@@ -340,7 +340,7 @@ module.exports = {
                     .setFooter({ text: 'Points Tracker' });
                 return await interaction.editReply({ embeds: [privateEmbed] });
             }
-            const { found, pageNumber, message } = await findGarBadgePage(userId);
+            //const { found, pageNumber, message } = await findGarBadgePage(userId);
             const accountResponse = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
             
            
@@ -378,8 +378,8 @@ module.exports = {
                 groupCount 
             };
 
-            const score = assessAccount(accountDetails, metrics, pageNumber);
-            //const score = assessAccount(accountDetails, metrics);
+            //const score = assessAccount(accountDetails, metrics, pageNumber);
+            const score = assessAccount(accountDetails, metrics);
             const altCategory = categorizeAlt(score);
 
             let embedColor;
@@ -404,7 +404,7 @@ module.exports = {
                 { name: 'Following List Count', value: `${followingCount}`, inline: true },
                 { name: 'Alt Account Likelihood', value: `${altCategory}`, inline: true },
                 { name: 'Roblox Profile', value: `[View Profile](https://www.roblox.com/users/${userId}/profile)`, inline: true },
-                { name: 'Gar Welcome Badge', value: message, inline: true },
+                //{ name: 'Gar Welcome Badge', value: message, inline: true },
                  
             )
             
