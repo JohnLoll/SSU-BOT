@@ -284,6 +284,7 @@ const categorizeAlt = (score) => {
 };
 
 module.exports = {
+    officer: true,
     data: new SlashCommandBuilder()
         .setName('backgroundcheck')
         .setDescription('Detects if a Roblox user might be an alternate account.')
@@ -293,7 +294,7 @@ module.exports = {
                 .setRequired(true))
         .setDMPermission(false),
     async execute(interaction) {
-        const ownerid = '721500712973893654';
+       /* const ownerid = '721500712973893654';
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
             const embed = new EmbedBuilder()
                 .setColor('#ffcc00')
@@ -303,6 +304,7 @@ module.exports = {
                 .setFooter({ text: 'Points Tracker' });
             return await interaction.reply({ embeds: [embed], ephemeral: true });
         }
+            */
         await interaction.deferReply();
         
 
