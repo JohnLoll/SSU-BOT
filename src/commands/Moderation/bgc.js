@@ -285,7 +285,7 @@ const categorizeAlt = (score) => {
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('detect_alt')
+        .setName('backgroundcheck')
         .setDescription('Detects if a Roblox user might be an alternate account.')
         .addStringOption(option =>
             option.setName('username')
@@ -409,8 +409,10 @@ module.exports = {
             )
             
             .setColor(embedColor)
-            .setFooter({ text: 'detect_alt | SSU Bot' });
-
+            .setFooter({
+                text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                iconURL: interaction.client.user.displayAvatarURL()
+              });
         await interaction.editReply({ embeds: [embed] });
     } catch (error) {
         console.error(error);

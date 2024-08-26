@@ -83,7 +83,10 @@ module.exports = {
                                         
                                     )
                                     .setColor('Green')
-                                    .setFooter({ text: 'check ep | SSU Bot' });
+                                    .setFooter({
+                                        text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                                        iconURL: interaction.client.user.displayAvatarURL()
+                                      });
 
                                 await interaction.reply({ embeds: [embed], ephemeral: true });
                                 return true;

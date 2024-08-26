@@ -156,7 +156,7 @@ module.exports = {
                     title: `User Information | ${officerNicknameWithoutTimezone}`,
                     color: 0x00FF00,
                     fields: fields,
-                    footer: { text: 'userinfo | SSU Bot' }, // Set your bot's name here
+                    footer: { text: `${interaction.commandName} | ${interaction.client.user.username} `}, 
                   }]
                 });
               }
@@ -223,7 +223,7 @@ module.exports = {
             title: `User Information | ${officerNicknameWithoutTimezone}`,
             color: 0x00FF00,
             fields: fields,
-            footer: { text: 'userinfo | SSU BOT' }, // Set your bot's name here
+            footer: { text: `${interaction.commandName} | ${interaction.client.user.username} `},
           }]
         });
       }

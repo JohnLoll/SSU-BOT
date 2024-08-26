@@ -36,10 +36,10 @@ module.exports = {
           "**/guard-log ** Submits a request for EP for guarding a VIP. \n"
           //"**/discharge {company} {user} {usernickname}** Remove's a user from the EP and CEP sheet for the spesified company. Optional usernickname option if the user has already left the discord.\n"
           )
-        .setFooter({
-          text: interaction.guild.name,
-          iconURL: interaction.guild.iconURL()
-        });
+          .setFooter({
+            text: `${interaction.commandName} | ${interaction.client.user.username}`,
+            iconURL: interaction.client.user.displayAvatarURL()
+          });
        await interaction.editReply({ embeds: [embed] });
       return;
     }

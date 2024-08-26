@@ -37,7 +37,10 @@ module.exports = {
         .setTitle(`> Bot's Statistics`)
         .setAuthor({ name: '🤖 Bot Statistics Tool'})
         .setThumbnail(avatar)
-        .setFooter({ text: `🤖 The Bot's statistics`})
+        .setFooter({
+            text: `${interaction.commandName} | ${interaction.client.user.username}`,
+            iconURL: interaction.client.user.displayAvatarURL()
+          })
         .setTimestamp()
         .addFields({ name: '• Servers Count', value: `> ${client.guilds.cache.size}`, inline: true})
         .addFields({ name: '• Members Count', value: `> ${servercount}`, inline: true})
@@ -60,7 +63,10 @@ module.exports = {
         .setThumbnail(avatar)
         .setAuthor({ name: `💻 Bot Specs`})
         .setColor("DarkRed")
-        .setFooter({ text: `💻 Bot Specs initialized`})
+        .setFooter({
+            text: `${interaction.commandName} | ${interaction.client.user.username}`,
+            iconURL: interaction.client.user.displayAvatarURL()
+          })
         .addFields({name: `• Memory:`, value: `> ${(memoryUsed/memoryTotal * 100).toFixed(1)}%`})
         .addFields({name: '• OS:', value: `> ${os.type}`})
         .addFields({name: `• OS Version:`, value: `> ${os.release}`})
@@ -76,7 +82,10 @@ module.exports = {
         .setColor("DarkBlue")
         .setTitle('Connection between the bot and discord')
         .setDescription( `> Pong: ${Math.round(client.ws.ping)}ms`)
-        .setFooter({ text: `🏓 Ping recorded`})
+        .setFooter({
+            text: `${interaction.commandName} | ${interaction.client.user.username}`,
+            iconURL: interaction.client.user.displayAvatarURL()
+          })
         .setTimestamp()
         .setAuthor({ name: `🏓 Ping Command`})
         .setThumbnail(avatar)
@@ -90,7 +99,10 @@ module.exports = {
         .setColor("Green")
         .setTitle('The bot is **online!**')
         .setDescription('> The bot is fuctioning correctly.')
-        .setFooter({ text: `🟢 Online command succeeded`})
+        .setFooter({
+            text: `${interaction.commandName} | ${interaction.client.user.username}`,
+            iconURL: interaction.client.user.displayAvatarURL()
+          })
         .setTimestamp()
         .setAuthor({ name: `🟢 Online Command`})
         .setThumbnail(avatar)

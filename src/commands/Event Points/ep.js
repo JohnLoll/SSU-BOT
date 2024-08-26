@@ -100,8 +100,8 @@ module.exports = {
                               .setColor(operation === 'add' ? '#00FF00' : '#FF0000') // Green or Red
                               .setTimestamp()
                               .setFooter({
-                                text: interaction.guild.name,
-                                iconURL: interaction.guild.iconURL() // Your provided icon URL
+                                text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                                iconURL: interaction.client.user.displayAvatarURL()
                               })
                       ]
                   });

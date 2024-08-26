@@ -88,7 +88,10 @@ module.exports = {
             const description = `**Top Weekly EP Users:**\n${topWeeklyEpUsers}\n\n**Top Total EP Users:**\n${topTotalEpUsers}`;
 
             embed.setDescription(description)
-            .setFooter({ text: `epboard | SSU Bot` });
+            .setFooter({
+                text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                iconURL: interaction.client.user.displayAvatarURL()
+              });
 
             // Send response
             if (!interaction.replied) {

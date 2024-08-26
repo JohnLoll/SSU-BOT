@@ -117,7 +117,10 @@ module.exports = {
                         { name: 'Command Issued by', value: `<@${interaction.user.id}>`, inline: true },
                         { name: 'User Affected', value: 'All Users', inline: true }
                     )
-                    .setFooter({ text: 'Command executed' })
+                    .setFooter({
+                        text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                        iconURL: interaction.client.user.displayAvatarURL()
+                      })
                     .setTimestamp(new Date());
 
                 // Send the log message to the log channel
@@ -132,7 +135,10 @@ module.exports = {
                     .setTitle('EP Reset')
                     .setDescription('EPs have been reset for all users.')
                     .setTimestamp()
-                    .setFooter({ text: `resetep | SSU Bot` }); // Set your bot's name here
+                    .setFooter({
+                        text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                        iconURL: interaction.client.user.displayAvatarURL()
+                      });
                 await interaction.reply({ embeds: [replyEmbed] });
             } else {
                 // Debug statement 4: Check if the data is not found
@@ -142,7 +148,10 @@ module.exports = {
                     .setTitle('Spreadsheet Data Not Found')
                     .setDescription('Could not find data in the specified spreadsheet range.')
                     .setTimestamp()
-                    .setFooter({ text: `resetep | SSU Bot` }); // Set your bot's name here
+                    .setFooter({
+                        text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                        iconURL: interaction.client.user.displayAvatarURL()
+                      });
                 await interaction.reply({ embeds: [embed] });
             }
         } catch (error) {
@@ -153,7 +162,10 @@ module.exports = {
                 .setTitle('Error Resetting EPs')
                 .setDescription('An error occurred while resetting EPs in Google Sheets.')
                 .setTimestamp()
-                .setFooter({ text: `resetep | SSU Bot` }); // Set your bot's name here
+                .setFooter({
+                    text: `${interaction.commandName} | ${interaction.client.user.username}`,
+                    iconURL: interaction.client.user.displayAvatarURL()
+                  });
             await interaction.reply({ embeds: [embed] });
         }
     },
