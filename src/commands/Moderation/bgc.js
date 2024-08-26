@@ -409,7 +409,7 @@ module.exports = {
             )
             
             .setColor(embedColor)
-            .setFooter({ text: 'detect_alt | Points Tracker' });
+            .setFooter({ text: 'detect_alt | SSU Bot' });
 
         await interaction.editReply({ embeds: [embed] });
     } catch (error) {
