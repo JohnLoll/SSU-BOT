@@ -100,8 +100,8 @@ module.exports = {
                               .setColor(operation === 'add' ? '#00FF00' : '#FF0000') // Green or Red
                               .setTimestamp()
                               .setFooter({
-                                text: `${interaction.commandName} | ${interaction.client.user.username}`,
-                                iconURL: interaction.client.user.displayAvatarURL()
+                                text: interaction.guild.name,
+                                iconURL: interaction.guild.iconURL() // Your provided icon URL
                               })
                       ]
                   });
@@ -339,109 +339,111 @@ module.exports = {
   
     
         
-    if (amountToAdd > 0){
+   
+   
+    
+    
+      }
+      if (amountToAdd > 0){
 
   
   
-  const guild =interaction.guild
-       
-     
-  const logEmbed = {
-    color: 0xff0000, // Red color
-    title: 'EP Addition Command',
-    author: {
-      name: mentionedUser.tag,
-      icon_url: avatar,
-    },
-    description: 'Added EP.',
-    fields: [
-      {
-        name: 'Command Issued by',
-        value: `<@${mentionedUser}>`,
-        inline: true,
-      },
-      {
-        name: 'Users Affected',
-        value: `${mentionedUsersString}`,
-        inline: true,
-      },
-      {
-        name: 'Amount Added',
-        value: `${amountToAdd}`,
-        inline: true,
-      },
-      {
-        name: 'Reason',
-        value: `${reason}`,
-        inline: true,
-      },
-    ],
-    footer: {
-      text: 'Command executed',
-    },
-    timestamp: new Date(),
-  };
-  
-      // Send the log message to the log channel
-       const logChannel = guild.channels.cache.get(logchannel);
-      if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
-        await logChannel.send({ embeds: [logEmbed] });
-      }
-      
-    
-    }
-    if(amountToRemove > 0){
         const guild =interaction.guild
+             
+           
+        const logEmbed = {
+          color: 0xff0000, // Red color
+          title: 'EP Addition Command',
+          author: {
+            name: mentionedUser.tag,
+            icon_url: avatar,
+          },
+          description: 'Added EP.',
+          fields: [
+            {
+              name: 'Command Issued by',
+              value: `<@${mentionedUser}>`,
+              inline: true,
+            },
+            {
+              name: 'Users Affected',
+              value: `${mentionedUsersString}`,
+              inline: true,
+            },
+            {
+              name: 'Amount Added',
+              value: `${amountToAdd}`,
+              inline: true,
+            },
+            {
+              name: 'Reason',
+              value: `${reason}`,
+              inline: true,
+            },
+          ],
+          footer: {
+            text: 'Command executed',
+          },
+          timestamp: new Date(),
+        };
+        
+            // Send the log message to the log channel
+             const logChannel = guild.channels.cache.get(logchannel);
+            if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+              await logChannel.send({ embeds: [logEmbed] });
+            }
             
-     
-     
-  
-  
-  const logEmbed = {
-    color: 0xff0000, // Red color
-    title: 'EP Removal Command',
-    author: {
-      name: mentionedUser.tag,
-      icon_url: avatar,
-    },
-    description: 'Removed EP.',
-    fields: [
-      {
-        name: 'Command Issued by',
-        value: `<@${mentionedUser}>`,
-        inline: true,
-      },
-      {
-        name: 'Users Affected',
-        value: `${mentionedUsersString}`,
-        inline: true,
-      },
-      {
-        name: 'Amount Removed',
-        value: `${amountToRemove}`,
-        inline: true,
-      },
-      {
-        name: 'Reason',
-        value: `${reason}`,
-        inline: true,
-      },
-    ],
-    footer: {
-      text: 'Command executed',
-    },
-    timestamp: new Date(),
-  };
-      // Send the log message to the log channel
-    
-       const logChannel = guild.channels.cache.get(logchannel);
-      if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
-        await logChannel.send({ embeds: [logEmbed] });
-      }
-   
-    }
-    
-      }
+          
+          }
+          if(amountToRemove > 0){
+              const guild =interaction.guild
+                  
+           
+           
+        
+        
+        const logEmbed = {
+          color: 0xff0000, // Red color
+          title: 'EP Removal Command',
+          author: {
+            name: mentionedUser.tag,
+            icon_url: avatar,
+          },
+          description: 'Removed EP.',
+          fields: [
+            {
+              name: 'Command Issued by',
+              value: `<@${mentionedUser}>`,
+              inline: true,
+            },
+            {
+              name: 'Users Affected',
+              value: `${mentionedUsersString}`,
+              inline: true,
+            },
+            {
+              name: 'Amount Removed',
+              value: `${amountToRemove}`,
+              inline: true,
+            },
+            {
+              name: 'Reason',
+              value: `${reason}`,
+              inline: true,
+            },
+          ],
+          footer: {
+            text: 'Command executed',
+          },
+          timestamp: new Date(),
+        };
+            // Send the log message to the log channel
+          
+             const logChannel = guild.channels.cache.get(logchannel);
+            if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+              await logChannel.send({ embeds: [logEmbed] });
+            }
+          }
     }
     }
     
