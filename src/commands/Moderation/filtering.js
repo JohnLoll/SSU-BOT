@@ -3,7 +3,17 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const axios = require('axios');
 const NodeCache = require('node-cache'); // Use a cache system
-
+const { filteringlogchannelModel } = require('../../Schemas/filteringlogchannel');
+var logdata = await fitleringlogchannelModel.find({ Guild: interaction.guild.id});
+let logchannel = null;
+                  var logvalues = [];
+                  await logdata.forEach(async value => {
+                      if (!value.Channel) return;
+                      else {
+                         
+                          logvalues.push(logchannel = value.Channel);
+                      }
+                  });
 const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); // Cache for 1 hour
 let premiumStatus;
 // Exponential backoff for rate-limited retries
@@ -434,7 +444,7 @@ module.exports = {
                 embedColor = '#00FF00'; // Green
             }
            
-        const targetChannelId = ''; // Replace with your actual channel ID
+        const targetChannelId = logchannel; // Replace with your actual channel ID
         const targetChannel = interaction.client.channels.cache.get(targetChannelId);
 
         // Debugging: Check if the channel is fetched correctly
