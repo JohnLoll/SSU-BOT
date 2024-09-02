@@ -284,41 +284,80 @@ const categorizeAlt = (score) => {
 };
 
 module.exports = {
-    officer: true,
     data: new SlashCommandBuilder()
-        .setName('backgroundcheck')
-        .setDescription('Detects if a Roblox user might be an alternate account.')
+        .setName('filtering')
+        .setDescription('Collects data for the filtering process.')
         .addStringOption(option =>
-            option.setName('username')
-                .setDescription('The Roblox username to check')
+            option.setName('roblox_username')
+                .setDescription('Your Roblox username')
                 .setRequired(true))
-        .setDMPermission(false),
+        .addStringOption(option =>
+            option.setName('roblox_profile')
+                .setDescription('Link to your Roblox profile')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('tryout_host')
+                .setDescription('The person who hosted the tryout')
+                .setRequired(true))
+        .addStringOption(option =>
+            option.setName('group_pending')
+                .setDescription('Have you requested to join the group?')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Yes', value: 'yes' },
+                    { name: 'No', value: 'no' }
+                )),
+    
     async execute(interaction) {
-       /* const ownerid = '721500712973893654';
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
-            const embed = new EmbedBuilder()
-                .setColor('#ffcc00')
-                .setTitle('⚠️ Permission Denied')
-                .setDescription('You do not have the necessary permissions to use this command.')
-                .setTimestamp()
-                .setFooter({ text: 'Points Tracker' });
-            return await interaction.reply({ embeds: [embed], ephemeral: true });
+        
+        await interaction.reply({ content: 'Please wait while your data is being proccesed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
+        const robloxUsername = interaction.options.getString('roblox_username');
+        const robloxProfile = interaction.options.getString('roblox_profile');
+        const tryoutHost = interaction.options.getString('tryout_host');
+        const groupPending = interaction.options.getString('group_pending');
+
+        const profileIdMatch = robloxProfile.match(/\/users\/(\d+)\//);
+        if (!profileIdMatch) {
+            await interaction.followUp({ content: 'The provided Roblox profile link is invalid. Please check the link and try again.', ephemeral: true });
+            return;
         }
-            */
-        await interaction.deferReply();
-        
+        const userId = profileIdMatch[1];
 
-
-        //const exemptedUserIds = ['292878532', '149898784', '296840366', '591649086'];
-            const username = interaction.options.getString('username');
-        
+        let userData;
         try {
-            const userIdResponse = await axios.post('https://users.roblox.com/v1/usernames/users', { usernames: [username] });
-            const userId = userIdResponse.data.data[0]?.id?.toString(); 
-        
-            if (!userId) {
-                return interaction.editReply(`User ${username} not found on Roblox.`);
+            const userResponse = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+            userData = await userResponse.json();
+
+            if (!userResponse.ok || !userData || !userData.name) {
+                throw new Error('Invalid response when fetching username');
             }
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            await interaction.followUp({ content: 'The provided Roblox userid associated with the profile link is invalid. Please check your inputs and try again.', ephemeral: true });
+            return;
+        }
+
+        const fetchedUsername = userData.name;
+
+        if (robloxUsername.toLowerCase() !== fetchedUsername.toLowerCase()) {
+            await interaction.followUp({ content: 'The provided Roblox username does not match the username associated with the profile link. Please check your inputs and try again.', ephemeral: true });
+            return;
+        }
+
+        if (groupPending !== 'yes') {
+            await interaction.followUp({ content: 'Please resubmit this command after you have requested to join the group: https://www.roblox.com/groups/33963728/Speci-l-Service-Unit#!/about', ephemeral: true });
+            return;
+        }
+
+        // Log to check if the target channel is being fetched
+        console.log('Fetching target channel...');
+     
+        
+        
+           
+           
+        
+         
         
             //console.log(`Checking userId: ${userId}`);
         /*
@@ -339,10 +378,10 @@ module.exports = {
                 const privateEmbed = new EmbedBuilder()
                     .setColor('#ffcc00')
                     .setTitle('Inventory Private')
-                    .setDescription('The inventory of this user is set to private. I cannot fetch the users inventory details.')
+                    .setDescription('Your roblox inventory is set to private. Please change this to public and try again.')
                     .setTimestamp()
                     .setFooter({ text: 'Points Tracker' });
-                return await interaction.editReply({ embeds: [privateEmbed] });
+                return await interaction.followUp({ embeds: [privateEmbed] });
             }
             //const { found, pageNumber, message } = await findGarBadgePage(userId);
             const accountResponse = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
@@ -395,8 +434,18 @@ module.exports = {
                 embedColor = '#00FF00'; // Green
             }
            
+        const targetChannelId = ''; // Replace with your actual channel ID
+        const targetChannel = interaction.client.channels.cache.get(targetChannelId);
+
+        // Debugging: Check if the channel is fetched correctly
+        if (!targetChannel) {
+            console.error('Target channel not found. Check if the channel ID is correct and if the bot has access to the channel.');
+            //await interaction.editReply({ content: 'Failed to send the embed. Please check the bot permissions or channel ID and try again later.', ephemeral: true });
+            return;
+        }
+
             const embed = new EmbedBuilder()
-            .setTitle(`User Analysis: ${username}`)
+            .setTitle(`User Analysis: ${robloxUsername}`)
             .addFields(
                 { name: 'Account Age', value: `${accountAge} days`, inline: true },
                 { name: 'Clothing Count', value: `${clothingCount}`, inline: true },
@@ -408,6 +457,7 @@ module.exports = {
                 { name: 'Following List Count', value: `${followingCount}`, inline: true },
                 { name: 'Alt Account Likelihood', value: `${altCategory}`, inline: true },
                 { name: 'Roblox Profile', value: `[View Profile](https://www.roblox.com/users/${userId}/profile)`, inline: true },
+                { name: 'Tryout Host', value: tryoutHost, inline: true },
                 { name: 'Ban Status', value: info.isBanned ? "True" : "False", inline: true },
                 //{ name: 'Gar Welcome Badge', value: message, inline: true },
                  
@@ -418,10 +468,15 @@ module.exports = {
                 text: `${interaction.commandName} | ${interaction.client.user.username}`,
                 iconURL: interaction.client.user.displayAvatarURL()
               });
-        await interaction.editReply({ embeds: [embed] });
-    } catch (error) {
-        console.error(error);
-        await interaction.editReply('There was an error processing your request. Please try again later.');
-    }
+
+        try {
+            await targetChannel.send({ embeds: [embed] });
+        } catch (error) {
+            console.error('Error sending message to channel:', error);
+            //await interaction.editReply({ content: 'Failed to send the embed. Please try again later.', ephemeral: true });
+            return;
+        }
+
+        await interaction.followUp({ content: 'Your filtering info has been **successfully** logged.', ephemeral: true });
     }
 };

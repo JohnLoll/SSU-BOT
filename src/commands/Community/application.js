@@ -125,22 +125,28 @@ module.exports = {
       .setDescription('Choose the tenth question for the application.')
       .setMaxLength(500)
     )
-    .addRoleOption((option) =>
-    option
-      .setName('ping')
-      .setDescription('Add a ping for the panel.')
+    .addStringOption((option) =>
+      option
+        .setName('question-11')
+        .setDescription('Choose the eleventh question for the application.')
+        .setRequired(true)
+        .setMaxLength(500)
       )
-    .addRoleOption((option) =>
-    option
-      .setName('moderator-role')
-      .setDescription('The role that will be pinged when an application gets sent thru.')
+     
+      .addRoleOption((option) =>
+        option
+          .setName('ping')
+          .setDescription('Add a role to ping for the panel.')
+      )
+      .addRoleOption((option) =>
+        option
+          .setName('moderator-role')
+          .setDescription('The role that will be pinged when an application is submitted.')
       )
       .setDMPermission(false),
+  
     async execute(interaction, client) {
-      const ownerid = '721500712973893654'
-      if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.member.id !== ownerid) {
-          return await interaction.reply({ content: `⚠️ You don't have perms to use this!`, ephemeral: true });
-      }
+     
 
         const { guild, options } = interaction;
  
@@ -161,6 +167,8 @@ module.exports = {
             const question8 = options.getString('question-8');
             const question9 = options.getString('question-9');
             const question10 = options.getString('question-10');
+            const question11 = options.getString('question-11');
+           
             const duration = options.getString('duration');
  
             async function isValidCustomEmoji(emoji) {
@@ -225,6 +233,8 @@ module.exports = {
                 Question8: question8,
                 Question9: question9,
                 Question10: question10,
+                Question11: question11,
+               
                 Duration: duration
               };
               const questions = await StaffMessages.findOneAndUpdate(filter, update);
@@ -243,7 +253,8 @@ module.exports = {
                   Question7: question7,
                   Question8: question8,
                   Question9: question9,
-                  Question10: question10
+                  Question10: question10,
+                  Question11: question11,
                 });
                 await newQuestions.save();
               }

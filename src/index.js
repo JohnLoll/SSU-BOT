@@ -140,7 +140,7 @@ client.on(Events.MessageCreate, async message => {
         const question8 = questioning.Question8
         const question9 = questioning.Question9
         const question10 = questioning.Question10
- 
+        const question11 = questioning.Question11
         let questions = [
           question1,
           question2,
@@ -151,7 +151,8 @@ client.on(Events.MessageCreate, async message => {
           question7,
           question8,
           question9,
-          question10
+          question10,
+          question11
         ].filter((question) => question !== undefined && question !== null);
  
           staffMessage.Messages += `${message.content}\n`;
@@ -206,6 +207,8 @@ client.on(Events.MessageCreate, async message => {
             let appQuestion8 = messages[8];
             let appQuestion9 = messages[9];
             let appQuestion10 = messages[10];
+            let appQuestion11 = messages[11];
+            
  
             const applicationsEmbed = new EmbedBuilder()
             .setColor(0x18e1ee)
@@ -281,6 +284,13 @@ client.on(Events.MessageCreate, async message => {
                 }
                 applicationsEmbed.addFields({ name: 'Question 10', value: appQuestion10, inline: true });
               }
+              if (appQuestion11) {
+                if (appQuestion11.length > 350) {
+                  appQuestion11 = 'Answer was too long';
+                }
+                applicationsEmbed.addFields({ name: 'Question 11', value: appQuestion11, inline: true });
+              }
+              
           
           applicationsEmbed.setTimestamp();
  
