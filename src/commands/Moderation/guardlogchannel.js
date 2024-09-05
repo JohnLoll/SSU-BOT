@@ -65,10 +65,10 @@ module.exports = {
                 var data = await guardlogchannelModel.findOne({ Guild: interaction.guild.id});
             
                 if (!data) {
-                    // If the configuration is not found, return a message indicating so
+                  
                     return await sendMessage(`⚠️ Looks like there is no guard log channel configuration for this guild in the database, so I can't remove it!`);
                 } else {
-                    // If the configuration is found, remove it from the database
+                    
                     await guardlogchannelModel.deleteOne({ Guild: interaction.guild.id});
                     return await sendMessage(`The guard log channel has been successfully removed from the database!`);
                 }

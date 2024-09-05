@@ -143,27 +143,27 @@ async function findGarBadgePage(userId) {
             const data = await response.json();
 
             if (data.data.length === 0) {
-                break; // Exit if there are no more badges
+                break; 
             }
 
-            // Set the first badge page if it's not set yet
+            
             if (firstBadgePage === null) {
                 firstBadgePage = Math.floor(badgeCount / 30) + 1;
             }
 
-            // Check if the Gar badge is in the current page
+          
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id === GAR_BADGE_ID) {
                     foundGarBadge = true;
-                    garBadgePage = Math.floor((badgeCount + i) / 30) + 1; // Page number calculation
+                    garBadgePage = Math.floor((badgeCount + i) / 30) + 1; 
                     break;
                 }
             }
 
-            badgeCount += data.data.length; // Update the total badge count
-            cursor = data.nextPageCursor || ''; // Update cursor for the next page
+            badgeCount += data.data.length; 
+            cursor = data.nextPageCursor || ''; 
             if (!data.nextPageCursor) {
-                break; // Exit if there is no next page
+                break; 
             }
         }
 
@@ -242,10 +242,10 @@ const assessAccount = (accountDetails, metrics) => {
 
     let score = 0;
 
-    // Adjusted penalty factors for more sensitive detection
+    
     const ageFactor = accountAge > 2000 ? 0.10 : 0.20;
 
-    // Increased penalties for lower counts
+
     if (clothingCount < expectedClothing * 0.30) score += 4; 
     else if (clothingCount < expectedClothing * 0.50) score += 3;
 
@@ -261,7 +261,7 @@ const assessAccount = (accountDetails, metrics) => {
     if (groupCount < expectedGroups * ageFactor) score += 3; 
     else if (groupCount < expectedGroups * 0.60) score += 2;
 
-    // Adjusted special handling for high counts
+  
     if (clothingCount > expectedClothing * 1.5) score -= 2;
     if (accessoryCount > expectedAccessories * 1.5) score -= 1;
     if (gamepassCount > expectedGamePasses * 1.5) score -= 2;
@@ -359,7 +359,7 @@ module.exports = {
             return;
         }
 
-        // Log to check if the target channel is being fetched
+        
         console.log('Fetching target channel...');
      
         
@@ -407,7 +407,7 @@ module.exports = {
                 fetchInventory(8, userId),  // Fetch Accessories
                 fetchInventory(34, userId), // Fetch Gamepasses
                 fetchInventory(21, userId), // Fetch Badges
-                axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`) // Fetch Group membership
+                axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`)
             ]);
             
             const clothingCount = shirtCount + pantsCount; // Sum shirts and pants to get total clothing count
@@ -444,10 +444,10 @@ module.exports = {
                 embedColor = '#00FF00'; // Green
             }
            
-        const targetChannelId = logchannel; // Replace with your actual channel ID
+        const targetChannelId = logchannel; 
         const targetChannel = interaction.client.channels.cache.get(targetChannelId);
 
-        // Debugging: Check if the channel is fetched correctly
+        
         if (!targetChannel) {
             console.error('Target channel not found. Check if the channel ID is correct and if the bot has access to the channel.');
             //await interaction.editReply({ content: 'Failed to send the embed. Please check the bot permissions or channel ID and try again later.', ephemeral: true });

@@ -20,7 +20,7 @@ module.exports = {
 
         let targetUser = interaction.options.getUser('target');
 
-        // If no user is mentioned, use the user who sent the command
+      
         if (!targetUser) {
             targetUser = interaction.user;
         }
@@ -28,7 +28,7 @@ module.exports = {
         const officer = await interaction.guild.members.fetch(targetUser);
         let officerNickname = officer.nickname || officer.user.username;
 
-        // Remove the timezone information from the nickname
+    
         officerNickname = officerNickname.replace(/\s*\[.*\]\s*$/, '');
 
         console.log('Command started');
@@ -97,15 +97,27 @@ module.exports = {
 
                 if (!found) {
                     console.log(`User with Discord nickname "${officerNickname}" not found in the sheet.`);
-                    await interaction.reply(`User with Discord nickname "${officerNickname}" not found in the sheet.`);
+                    const errorEmbed = new EmbedBuilder()
+                    .setTitle('Error')
+                    .setDescription(`User with Discord nickname "${officerNickname}" not found in the sheet.`)
+                    .setColor(0xff0000);
+                     await interaction.editReply({ embeds: [errorEmbed] });
                 }
             } else {
                 console.log('Spreadsheet data not found.');
-                await interaction.reply('Spreadsheet data not found.');
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle('Error')
+                    .setDescription(`Spreadsheet data not found.`)
+                    .setColor(0xff0000);
+                     await interaction.reply({ embeds: [errorEmbed] });
             }
         } catch (error) {
             console.error('Error fetching data from Google Sheets:', error);
-            await interaction.reply('An error occurred while fetching data from Google Sheets.');
+            const errorEmbed = new EmbedBuilder()
+                    .setTitle('Error')
+                    .setDescription(`An error occurred while fetching data from Google Sheets.`)
+                    .setColor(0xff0000);
+                     await interaction.reply({ embeds: [errorEmbed] });
         }
     }
 };

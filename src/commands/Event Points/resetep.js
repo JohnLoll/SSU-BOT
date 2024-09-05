@@ -35,9 +35,9 @@ module.exports = {
             return;
         }
 
-        // Set up your authentication and the Google Sheets client
+  
         const auth = new google.auth.GoogleAuth({
-            keyFile: 'credentials.json', // Use your credentials file
+            keyFile: 'credentials.json', 
             scopes: 'https://www.googleapis.com/auth/spreadsheets',
         });
 
@@ -45,20 +45,20 @@ module.exports = {
 
         const range = Range;
 
-        // Debug statement 1: Check if the command starts
+     
         console.log('Command started');
 
-        // Debug statement 2: Check if the Google Sheets API is being called
+        
         console.log('Calling Google Sheets API');
 
-        // Fetch data from Google Sheets
+    
         try {
             const res = await sheets.spreadsheets.values.get({
                 spreadsheetId: Sheetid,
                 range,
             });
 
-            // Debug statement 3: Check if data is retrieved from Google Sheets
+         
             console.log('Data retrieved from Google Sheets');
 
             const values = res.data.values;
@@ -66,35 +66,34 @@ module.exports = {
             if (values) {
                 console.log('Searching in the specified range:');
 
-                // Create a new array to store modified values
+      
                 const modifiedValues = [];
 
-                // Iterate through all users in the range
+                
                 values.forEach((row, rowIndex) => {
-                    const modifiedRow = [...row]; // Copy the current row
+                    const modifiedRow = [...row]; 
                     const currentNickname = row[0];
 
                     if (currentNickname) {
-                        // Clean up the currentNickname by removing extra spaces and special characters
+                       
                         const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
 
-                        // Check if it's a valid nickname
                         if (cleanedCurrentNickname.length > 0) {
-                            // Calculate the column for the first EP, which should be Weeklyoffset
+                          
                             const firstEpColumn = Weeklyoffset;
 
                             if (values[rowIndex][firstEpColumn] > 0) {
-                                // Reset the first EP to zero
+                               
                                 modifiedRow[firstEpColumn] = '0';
                             }
                         }
                     }
 
-                    // Add the modified row to the new array
+                  
                     modifiedValues.push(modifiedRow);
                 });
 
-                // Update only the modified cells in the spreadsheet
+              
                 await sheets.spreadsheets.values.batchUpdate({
                     spreadsheetId: Sheetid,
                     resource: {
@@ -123,7 +122,6 @@ module.exports = {
                       })
                     .setTimestamp(new Date());
 
-                // Send the log message to the log channel
                 const logChannel = guild.channels.cache.get(logchannel);
                 if (logChannel instanceof Discord.TextChannel) {
                     await logChannel.send({ embeds: [logEmbed] });
@@ -141,7 +139,7 @@ module.exports = {
                       });
                 await interaction.reply({ embeds: [replyEmbed] });
             } else {
-                // Debug statement 4: Check if the data is not found
+             
                 console.log('Spreadsheet data not found.');
                 const embed = new EmbedBuilder()
                     .setColor('#ffcc00')
@@ -155,7 +153,7 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
             }
         } catch (error) {
-            // Debug statement 5: Check if an error occurs
+        
             console.error('Error resetting EPs in Google Sheets:', error);
             const embed = new EmbedBuilder()
                 .setColor('#ff0000')

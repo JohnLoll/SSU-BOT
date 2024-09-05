@@ -52,12 +52,11 @@ module.exports = {
                     }
                 const action = interaction.options.getString('action');
                 const mentionedUsersString = interaction.options.getString('user');
-                const mentionedUsers = mentionedUsersString.match(/(\d+)/g); // Extract user IDs using regular expression
-              
+                const mentionedUsers = mentionedUsersString.match(/(\d+)/g); 
                 for (const mentionedUserId of mentionedUsers) {
                   console.log(`Processing mentioned user ID: ${mentionedUserId}`);
                   try {
-                    const officer = interaction.guild.members.cache.get(mentionedUserId); // No need to trim, as IDs don't have leading/trailing spaces
+                    const officer = interaction.guild.members.cache.get(mentionedUserId); 
                     officerNickname = getNicknameWithoutTimezone(officer);
                     console.log(`Officer nickname: ${officerNickname}`);
                 } catch (error) {
@@ -81,11 +80,7 @@ module.exports = {
                   const logEmbed = {
                     color: 0xff0000,
                     title: 'User command.',
-                    author: {
-                      name: interaction.user.tag,
-                      icon_url: interaction.user.avatarURL(),
-                    },
-                    description: 'User command.',
+    
                     fields: [
                       {
                         name: 'Command Issued by',
@@ -104,7 +99,7 @@ module.exports = {
                       },
                     ],
                     footer: {
-                      text: 'Command executed',
+                      text: 'Logging System',
                     },
                     timestamp: new Date(),
                   };
@@ -112,7 +107,7 @@ module.exports = {
                   
                   const guild = interaction.guild
                   const logChannel = guild.channels.cache.get(logchannel);
-                  if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+                  if (logChannel instanceof Discord.TextChannel) { 
                     await logChannel.send({ embeds: [logEmbed] });
                   }
                 }
@@ -124,7 +119,7 @@ module.exports = {
                   
                   const { google } = require('googleapis');
                   const auth = new google.auth.GoogleAuth({
-                    keyFile: 'credentials.json', // Use your credentials file
+                    keyFile: 'credentials.json', 
                     scopes: 'https://www.googleapis.com/auth/spreadsheets',
                   });
                   const sheets = google.sheets({ version: 'v4', auth });
@@ -135,25 +130,25 @@ module.exports = {
               
                   const values = res.data.values;
               
-                  // Find the first empty row in the new company's range
+
                   let foundEmptyRow = false;
                   let newRowIndex;
               
                   for (let rowIndex = 0; rowIndex < values.length; rowIndex++) {
                     const row = values[rowIndex];
               
-                    // Check if the first column is empty
+                   
                     if (!row[0]) {
                       foundEmptyRow = true;
                       newRowIndex = rowIndex;
               
-                      // Set values in the new row
+      
                       const newRow = new Array(values[0].length).fill('');
                       newRow[0] = officerNickname;
                       newRow[Weeklyoffset] = '0';
                       newRow[Totaloffset] = '0';
               
-                      // Extract the starting column index, row index, and end column from cepRange
+                    
                       const match = Trooperrange.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/);
               
                       if (!match) {
@@ -164,15 +159,15 @@ module.exports = {
                       const startRow = parseInt(match[2], 10);
                       const endColumn = match[3];
               
-                      // Update values in the new row
+                  
                       values[newRowIndex] = newRow;
               
-                      // Update spreadsheet with modified values
+                
                       await sheets.spreadsheets.values.update({
                         spreadsheetId: Sheetid,
-                        range: `${startColumn}${newRowIndex + startRow}:${endColumn}${newRowIndex + startRow}`, // Change only the row index
+                        range: `${startColumn}${newRowIndex + startRow}:${endColumn}${newRowIndex + startRow}`, 
                         valueInputOption: 'USER_ENTERED',
-                        resource: { values: [newRow] }, // Use the modified newRow here
+                        resource: { values: [newRow] },
                       });
               
                       break;
@@ -180,7 +175,7 @@ module.exports = {
                   }
               
                   if (foundEmptyRow) {
-                    // Respond to the interaction
+              
                     interaction.channel.send(`Added ${officerNickname} to the EP Sheet.`);
                 } else {
                     interaction.channel.send(`No empty row found in the EP Sheet range.`);
@@ -213,7 +208,7 @@ module.exports = {
                     const range = Trooperrange;
                     const { google } = require('googleapis');
                     const auth = new google.auth.GoogleAuth({
-                      keyFile: 'credentials.json', // Use your credentials file
+                      keyFile: 'credentials.json', 
                       scopes: 'https://www.googleapis.com/auth/spreadsheets',
                     });
                     const sheets = google.sheets({ version: 'v4', auth });
@@ -261,17 +256,16 @@ module.exports = {
                                 totalPointsColumn,
                               });
               
-                              // Set nickname, weekly, and total points in variables
+                              
                               const newWeeklyPoints = '0';
                               const newTotalPoints = '0';
               
-                              // Save the removed nickname
                               removedNickname = cleanedCurrentNickname;
               
-                              // Update sheet with zero points and empty nickname
+                         
                               values[rowIndex][weeklyPointsColumn] = newWeeklyPoints.toString();
               values[rowIndex][totalPointsColumn] = newTotalPoints.toString();
-              values[rowIndex][columnIndex] = ''; // Set nickname to an empty string
+              values[rowIndex][columnIndex] = ''; 
               
               const usernameColumnLetter = getColumnLetter(columnIndex + 1);
               const weeklyColumnLetter = getColumnLetter(weeklyPointsColumn + 3);
@@ -301,7 +295,7 @@ module.exports = {
                       }
               
                       if (found) {
-                        // Update only the modified cells
+                     
                         await sheets.spreadsheets.values.batchUpdate({
                           spreadsheetId,
                           resource: {

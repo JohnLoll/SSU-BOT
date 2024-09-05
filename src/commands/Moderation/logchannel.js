@@ -65,10 +65,10 @@ module.exports = {
                 var data = await logchannelModel.findOne({ Guild: interaction.guild.id});
             
                 if (!data) {
-                    // If the configuration is not found, return a message indicating so
+                    
                     return await sendMessage(`⚠️ Looks like there is no log channel configuration for this guild in the database, so I can't remove it!`);
                 } else {
-                    // If the configuration is found, remove it from the database
+                   
                     await logchannelModel.deleteOne({ Guild: interaction.guild.id});
                     return await sendMessage(`The log channel has been successfully removed from the database!`);
                 }

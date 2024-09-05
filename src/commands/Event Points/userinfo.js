@@ -22,13 +22,13 @@ module.exports = {
       }
     });
 
-    // Initialize variables for EP data
+
     let totalEps = 0;
     let weeklyEps = 0;
 
-    let userFound = false; // Initialize userFound to false
+    let userFound = false; 
 
-    // Determine the target user
+ 
     let targetUser = interaction.options.getMember('user') || interaction.member;
     if (!targetUser) {
       targetUser = interaction.member;
@@ -39,14 +39,13 @@ module.exports = {
     const officerNickname = officer.nickname || officer.user.username;
     const officerNicknameWithoutTimezone = officerNickname.replace(/\s*\[.*\]\s*$/, '');
 
-    // Function to fetch EP data from Google Sheets
     const auth = new google.auth.GoogleAuth({
       keyFile: 'credentials.json', // Use your credentials file
       scopes: 'https://www.googleapis.com/auth/spreadsheets',
     });
 
     const sheets = google.sheets({ version: 'v4', auth });
-    const range = Range; // Make sure Range is defined correctly
+    const range = Range; 
 
     try {
       const res = await sheets.spreadsheets.values.get({
@@ -72,7 +71,7 @@ module.exports = {
                 console.log('User found in the sheet');
                 console.log('User\'s Total EP:', totalEps);
                 console.log('User\'s Weekly EP:', weeklyEps);
-                const robloxUsername = officerNicknameWithoutTimezone; // Assuming this gives the Roblox username
+                const robloxUsername = officerNicknameWithoutTimezone; 
                 const userIdResponse = await axios.post('https://users.roblox.com/v1/usernames/users', {
                   usernames: [robloxUsername]
                 });
@@ -85,14 +84,18 @@ module.exports = {
 
                 const joinDate = officer.joinedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
-                // Fetching weekly event hosting data or mention count
+               
                 const channel = interaction.guild.channels.cache.get(your_channel_id);
                 if (!channel) {
-                  await interaction.editReply('Error: The specified channel does not exist.');
+                  const errorEmbed = new EmbedBuilder()
+                  .setTitle('Error')
+                  .setDescription(`The specified channel does not exist.`)
+                  .setColor(0xff0000);
+                   interaction.editReply({ embeds: [errorEmbed] });
                   return;
                 }
 
-                // Calculate the start of the current week (Sunday)
+             
                 const today = new Date();
                 const dayOfWeek = today.getDay();
                 const startOfWeek = new Date(today);
@@ -100,7 +103,11 @@ module.exports = {
 
                 const messages = await channel.messages.fetch({ limit: 100 }).catch(err => {
                   console.error('Error fetching messages:', err);
-                  interaction.editReply('An error occurred while fetching messages from the channel.');
+                  const errorEmbed = new EmbedBuilder()
+              .setTitle('Error')
+              .setDescription(`An error occurred while fetching messages from the channel.`)
+              .setColor(0xff0000);
+               interaction.editReply({ embeds: [errorEmbed] });
                   return;
                 });
 
@@ -108,11 +115,9 @@ module.exports = {
 
                 let weeklyEventsHosted = 0;
 
-                // String of roles
-                const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1232175887084949605'; // Example role IDs
+                const rolesString = '1070129491483033732,1069748926565068810,1069748871225425960,1232175887084949605'; 
                 const rolesArray = rolesString.split(',');
 
-                // Check if the user has any of the roles in the array
                 const userHasRole = rolesArray.some(role => targetUser.roles.cache.has(role));
 
                 if (userHasRole) {
@@ -166,7 +171,7 @@ module.exports = {
       }
 
       if (!userFound) {
-        const robloxUsername = officerNicknameWithoutTimezone; // Assuming this gives the Roblox username
+        const robloxUsername = officerNicknameWithoutTimezone; 
         const userIdResponse = await axios.post('https://users.roblox.com/v1/usernames/users', {
           usernames: [robloxUsername]
         });
@@ -190,15 +195,19 @@ module.exports = {
           { name: 'Total EP', value: '0', inline: true }
         ];
 
-        // Only add the 'Events Attended This Week' field if the user does not have any of the specific roles
+    
         const userHasRole = rolesArray.some(role => targetUser.roles.cache.has(role));
         if (!userHasRole) {
-          // Fetch mentions count
+      
           const channel = interaction.guild.channels.cache.get(your_channel_id);
           if (channel) {
             const messages = await channel.messages.fetch({ limit: 100 }).catch(err => {
               console.error('Error fetching messages:', err);
-              interaction.editReply('An error occurred while fetching messages from the channel.');
+              const errorEmbed = new EmbedBuilder()
+              .setTitle('Error')
+              .setDescription(`An error occurred while fetching messages from the channel.`)
+              .setColor(0xff0000);
+               interaction.editReply({ embeds: [errorEmbed] });
               return;
             });
 
@@ -217,7 +226,7 @@ module.exports = {
           }
         }
 
-        // Create the user information embed
+    
         await interaction.editReply({
           embeds: [{
             title: `User Information | ${officerNicknameWithoutTimezone}`,
@@ -229,7 +238,11 @@ module.exports = {
       }
     } catch (err) {
       console.error('Error fetching data from Google Sheets:', err);
-      await interaction.editReply('An error occurred while fetching EP data from Google Sheets.');
+      const errorEmbed = new EmbedBuilder()
+                    .setTitle('Error')
+                    .setDescription(`An error occurred while fetching EP data from Google Sheets.`)
+                    .setColor(0xff0000);
+                     await interaction.editReply({ embeds: [errorEmbed] });
       return;
     }
   }

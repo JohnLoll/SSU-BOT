@@ -10,11 +10,15 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
         
-        // Fetch data from the database
+    
         const data = await epModel.findOne({ Guild: interaction.guild.id, Name: 'EP' });
 
         if (!data) {
-            await interaction.editReply('No EP data found for this server.');
+            const errorEmbed = new EmbedBuilder()
+                  .setTitle('Error')
+                  .setDescription('No EP data found for this server.')
+                  .setColor(0xff0000);
+                   await interaction.editReply({ embeds: [errorEmbed] });
             return;
         }
 
@@ -24,14 +28,14 @@ module.exports = {
         console.log('EP Board command started');
 
         try {
-            // Initialize Google Sheets API
+ 
             const auth = new google.auth.GoogleAuth({
                 keyFile: 'credentials.json',
                 scopes: 'https://www.googleapis.com/auth/spreadsheets',
             });
             const sheets = google.sheets({ version: 'v4', auth });
 
-            // Fetch data from the spreadsheet
+           
             const res = await sheets.spreadsheets.values.get({
                 spreadsheetId: Sheetid,
                 range: Range,
@@ -40,22 +44,26 @@ module.exports = {
             const values = res.data.values;
 
             if (!values || values.length === 0) {
-                await interaction.editReply('No data found in the spreadsheet.');
+                const errorEmbed = new EmbedBuilder()
+                .setTitle('Error')
+                .setDescription('No data found in the spreadsheet.')
+                .setColor(0xff0000);
+                 await interaction.editReply({ embeds: [errorEmbed] });
                 return;
             }
 
-            // Parse and process data
+       
             const leaderboard = [];
             const weeklyLeaderboard = [];
             
             for (let rIndex = 0; rIndex < values.length; rIndex++) {
                 const row = values[rIndex];
-                if (row.length < Totaloffset + 1) continue; // Skip rows that don't have enough columns
+                if (row.length < Totaloffset + 1) continue; 
 
-                let username = row[0]; // Assuming username is in the first column
+                let username = row[0];
                 if (!username || username.trim() === '') continue;
 
-                // Get EP values
+            
                 const totalEp = parseInt(row[Totaloffset] || '0', 10);
                 const weeklyEp = parseInt(row[Weeklyoffset] || '0', 10);
 
@@ -67,11 +75,11 @@ module.exports = {
                 }
             }
 
-            // Sort leaderboards
+         
             leaderboard.sort((a, b) => b.totalEp - a.totalEp);
             weeklyLeaderboard.sort((a, b) => b.weeklyEp - a.weeklyEp);
 
-            // Create embed message
+         
             const embed = new EmbedBuilder()
                 .setAuthor({ name: interaction.user.username })
                 .setTitle('EP Leaderboard')
@@ -93,18 +101,22 @@ module.exports = {
                 iconURL: interaction.client.user.displayAvatarURL()
               });
 
-            // Send response
+         
             if (!interaction.replied) {
                 await interaction.editReply({ embeds: [embed] });
             }
         } catch (error) {
             console.error('Error fetching data from Google Sheets:', error);
             if (!interaction.replied) {
-                await interaction.editReply('An error occurred while fetching data from Google Sheets.');
+                const errorEmbed = new EmbedBuilder()
+                .setTitle('Error')
+                .setDescription('An error occurred while fetching data from Google Sheets.')
+                .setColor(0xff0000);
+                 await interaction.editReply({ embeds: [errorEmbed] });
             }
         }
 
-        // Function to get rank text
+       
         function getRankText(index) {
             if (index === 0) {
                 return ':first_place:';

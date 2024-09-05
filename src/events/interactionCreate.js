@@ -213,7 +213,6 @@ module.exports = {
                 const logEmbed = {
                   color: 0xff0000, // Red color
                   title: 'Guard Log Approved',
-                  description: 'Guard Log Approved',
                   fields: [
                     {
                       name: 'Staff Memnber',
@@ -232,7 +231,7 @@ module.exports = {
                     },
                   ],
                   footer: {
-                    text: 'Command executed',
+                    text: 'Logging System',
                   },
                   timestamp: new Date(),
                 };

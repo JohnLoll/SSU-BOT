@@ -2,18 +2,18 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const axios = require('axios');
-const NodeCache = require('node-cache'); // Use a cache system
+const NodeCache = require('node-cache'); 
 
-const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); // Cache for 1 hour
+const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); 
 let premiumStatus;
-// Exponential backoff for rate-limited retries
+
 const checkInventoryVisibility = async (userId) => {
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     const maxRetries = 20;
     let attempt = 0;
-    let delayTime = 5000; // Start with a 5-second delay
+    let delayTime = 5000; 
 
-    const cachedInventory = inventoryCache.get(userId); // Check if we already have the result cached
+    const cachedInventory = inventoryCache.get(userId); 
     if (cachedInventory !== undefined) {
         return cachedInventory;
     }
@@ -22,13 +22,13 @@ const checkInventoryVisibility = async (userId) => {
         try {
             const response = await axios.get(`https://inventory.roblox.com/v1/users/${userId}/can-view-inventory`);
             const canView = response.data.canView;
-            inventoryCache.set(userId, canView); // Cache the result
+            inventoryCache.set(userId, canView); 
             return canView;
         } catch (error) {
-            if (error.response && error.response.status === 429) { // Rate limit error
+            if (error.response && error.response.status === 429) { 
                 console.log(`Rate limit exceeded. Retrying in ${delayTime / 1000} seconds... Attempt ${attempt + 1}`);
-                await delay(delayTime); // Exponential backoff
-                delayTime *= 2; // Double the delay each time
+                await delay(delayTime); 
+                delayTime *= 2; 
                 attempt++;
             } else {
                 console.error(`Error checking inventory visibility for userId ${userId}:`, error.response ? error.response.data : error.message);
@@ -40,7 +40,6 @@ const checkInventoryVisibility = async (userId) => {
     throw new Error('Max retries reached while checking inventory visibility');
 };
 
-// Fetch inventory details with improved retry and rate limit handling
 const fetchInventory = async (assetTypeId, userId) => {
     let totalCount = 0;
     let nextPageCursor = null;
@@ -53,7 +52,7 @@ const fetchInventory = async (assetTypeId, userId) => {
         } catch (error) {
             if (error.response && error.response.status === 429) {
                 console.log('Rate limit exceeded. Retrying...');
-                await delay(5000); // Wait for 5 seconds before retrying
+                await delay(5000); 
                 return makeRequest(url, params); 
             } else {
                 throw error;
@@ -73,10 +72,10 @@ const fetchInventory = async (assetTypeId, userId) => {
 
         const items = response.Data?.Items || [];
 
-        if (assetTypeId === 34) { // Gamepasses
+        if (assetTypeId === 34) { 
             const filteredItems = items.filter(item => item.Creator && item.Creator.Id !== userId);
             totalCount += filteredItems.length;
-        } else if (assetTypeId === 21) { // Badges
+        } else if (assetTypeId === 21) { 
             items.forEach(item => {
                 const creatorId = item.Creator?.Id;
                 if (creatorId) {
@@ -91,7 +90,7 @@ const fetchInventory = async (assetTypeId, userId) => {
             });
         } else {
             items.forEach(item => {
-                if (item.Creator?.Id === 1) { // Roblox-made items have Creator.Id of 1
+                if (item.Creator?.Id === 1) {
                     robloxAccessoryCount++;
                 } else {
                     totalCount++;
@@ -103,7 +102,7 @@ const fetchInventory = async (assetTypeId, userId) => {
     } while (nextPageCursor);
 
     if (assetTypeId === 8 && robloxAccessoryCount > 5) {
-        totalCount += 5; // Cap Roblox accessories at 5
+        totalCount += 5; 
     } else {
         totalCount += robloxAccessoryCount;
     }
@@ -133,27 +132,27 @@ async function findGarBadgePage(userId) {
             const data = await response.json();
 
             if (data.data.length === 0) {
-                break; // Exit if there are no more badges
+                break; 
             }
 
-            // Set the first badge page if it's not set yet
+      
             if (firstBadgePage === null) {
                 firstBadgePage = Math.floor(badgeCount / 30) + 1;
             }
 
-            // Check if the Gar badge is in the current page
+       
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id === GAR_BADGE_ID) {
                     foundGarBadge = true;
-                    garBadgePage = Math.floor((badgeCount + i) / 30) + 1; // Page number calculation
+                    garBadgePage = Math.floor((badgeCount + i) / 30) + 1; 
                     break;
                 }
             }
 
-            badgeCount += data.data.length; // Update the total badge count
-            cursor = data.nextPageCursor || ''; // Update cursor for the next page
+            badgeCount += data.data.length; 
+            cursor = data.nextPageCursor || ''; 
             if (!data.nextPageCursor) {
-                break; // Exit if there is no next page
+                break; 
             }
         }
 
@@ -232,10 +231,8 @@ const assessAccount = (accountDetails, metrics) => {
 
     let score = 0;
 
-    // Adjusted penalty factors for more sensitive detection
     const ageFactor = accountAge > 2000 ? 0.10 : 0.20;
 
-    // Increased penalties for lower counts
     if (clothingCount < expectedClothing * 0.30) score += 4; 
     else if (clothingCount < expectedClothing * 0.50) score += 3;
 
@@ -251,7 +248,7 @@ const assessAccount = (accountDetails, metrics) => {
     if (groupCount < expectedGroups * ageFactor) score += 3; 
     else if (groupCount < expectedGroups * 0.60) score += 2;
 
-    // Adjusted special handling for high counts
+  
     if (clothingCount > expectedClothing * 1.5) score -= 2;
     if (accessoryCount > expectedAccessories * 1.5) score -= 1;
     if (gamepassCount > expectedGamePasses * 1.5) score -= 2;
@@ -361,7 +358,7 @@ module.exports = {
                 axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`) // Fetch Group membership
             ]);
             
-            const clothingCount = shirtCount + pantsCount; // Sum shirts and pants to get total clothing count
+            const clothingCount = shirtCount + pantsCount; 
 
             const groupCount = groupResponse.data.data.length;
 

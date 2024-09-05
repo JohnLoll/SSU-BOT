@@ -67,11 +67,11 @@ module.exports = {
         amountToRemove = 0;
     
         const mentionedUsersString = interaction.options.getString('user');
-        const mentionedUsers = mentionedUsersString.match(/(\d+)/g); // Extract user IDs using regular expression
+        const mentionedUsers = mentionedUsersString.match(/(\d+)/g); 
         
         function getNicknameWithoutTimezone(user) {
           const nickname = user.nickname || user.user.username;
-          return nickname.replace(/\s*\[.*\]\s*$/, ''); // Remove the timezone information from the nickname
+          return nickname.replace(/\s*\[.*\]\s*$/, ''); 
           }
           reason = interaction.options.getString('reason');
           const action = interaction.options.getString('action');
@@ -80,7 +80,7 @@ module.exports = {
             console.log(`Processing mentioned user ID: ${mentionedUserId}`);
             let officerNickname = null;
             try {
-              const officer = interaction.guild.members.cache.get(mentionedUserId); // No need to trim, as IDs don't have leading/trailing spaces
+              const officer = interaction.guild.members.cache.get(mentionedUserId); 
               officerNickname = getNicknameWithoutTimezone(officer);
               await modifyEPAndSendDM(officer.user, action === 'Add' ? amount : amount, reason, action.toLowerCase());
               console.log(`Officer nickname: ${officerNickname}`);
@@ -90,7 +90,7 @@ module.exports = {
             }
             async function modifyEPAndSendDM(user, amount, reason, operation) {
               try {
-                  // Send DM to the affected user
+
                   const dmChannel = await user.createDM();
                   dmChannel.send({
                       embeds: [
@@ -101,7 +101,7 @@ module.exports = {
                               .setTimestamp()
                               .setFooter({
                                 text: interaction.guild.name,
-                                iconURL: interaction.guild.iconURL() // Your provided icon URL
+                                iconURL: interaction.guild.iconURL() 
                               })
                       ]
                   });
@@ -122,7 +122,7 @@ module.exports = {
                 
                   const range = Range;
                   const auth = new google.auth.GoogleAuth({
-                    keyFile: 'credentials.json', // Use your credentials file
+                    keyFile: 'credentials.json', 
                     scopes: 'https://www.googleapis.com/auth/spreadsheets',
                   });
                   const sheets = google.sheets({ version: 'v4', auth });
@@ -183,7 +183,7 @@ module.exports = {
                     }
                   }
                     if (found) {
-                      // Update only the modified cells
+                    
                       await sheets.spreadsheets.values.batchUpdate({
                         spreadsheetId: Sheetid,
                         resource: {
@@ -220,7 +220,7 @@ module.exports = {
                 
                   const range = Range;
                   const auth = new google.auth.GoogleAuth({
-                    keyFile: 'credentials.json', // Use your credentials file
+                    keyFile: 'credentials.json',
                     scopes: 'https://www.googleapis.com/auth/spreadsheets',
                   });
                   const sheets = google.sheets({ version: 'v4', auth });
@@ -281,7 +281,6 @@ module.exports = {
                     }
                   }
                     if (found) {
-                      // Update only the modified cells
                       await sheets.spreadsheets.values.batchUpdate({
                         spreadsheetId: Sheetid,
                         resource: {
@@ -314,9 +313,9 @@ module.exports = {
        
     const { google } = require('googleapis');
 
-    // Set up your authentication and the Google Sheets client
+
     const auth = new google.auth.GoogleAuth({
-      keyFile: 'credentials.json', // Use your credentials file
+      keyFile: 'credentials.json', 
       scopes: 'https://www.googleapis.com/auth/spreadsheets',
     });
     sheets = google.sheets({ version: 'v4', auth });
@@ -354,11 +353,6 @@ module.exports = {
         const logEmbed = {
           color: 0xff0000, // Red color
           title: 'EP Addition Command',
-          author: {
-            name: mentionedUser.tag,
-            icon_url: avatar,
-          },
-          description: 'Added EP.',
           fields: [
             {
               name: 'Command Issued by',
@@ -382,14 +376,14 @@ module.exports = {
             },
           ],
           footer: {
-            text: 'Command executed',
+            text: 'Logging System',
           },
           timestamp: new Date(),
         };
         
-            // Send the log message to the log channel
+            
              const logChannel = guild.channels.cache.get(logchannel);
-            if (logChannel instanceof Discord.TextChannel) { // Use 'Discord.TextChannel' to check if it's a text channel
+            if (logChannel instanceof Discord.TextChannel) { 
               await logChannel.send({ embeds: [logEmbed] });
             }
             
@@ -405,11 +399,6 @@ module.exports = {
         const logEmbed = {
           color: 0xff0000, // Red color
           title: 'EP Removal Command',
-          author: {
-            name: mentionedUser.tag,
-            icon_url: avatar,
-          },
-          description: 'Removed EP.',
           fields: [
             {
               name: 'Command Issued by',
@@ -433,7 +422,7 @@ module.exports = {
             },
           ],
           footer: {
-            text: 'Command executed',
+            text: 'Logging System',
           },
           timestamp: new Date(),
         };

@@ -90,16 +90,16 @@ module.exports = {
                 }
             break;
             case 'remove':
-                var name = 'EP'; // Assuming 'EP' is the name of the configuration you want to remove
+                var name = 'EP'; 
             
-                // Find the configuration based on the provided name
+               
                 var data = await epModel.findOne({ Guild: interaction.guild.id, Name: name });
             
                 if (!data) {
-                    // If the configuration is not found, return a message indicating so
+                  
                     return await sendMessage(`⚠️ Looks like there is no configuration with the name "${name}" in the database, so I can't remove it!`);
                 } else {
-                    // If the configuration is found, remove it from the database
+            
                     await epModel.deleteOne({ Guild: interaction.guild.id, Name: name });
                     return await sendMessage(`The "${name}" configuration has been successfully removed from the database!`);
                 }
