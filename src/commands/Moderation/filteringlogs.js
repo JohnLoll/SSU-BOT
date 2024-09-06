@@ -15,7 +15,7 @@ module.exports = {
 
         const { options } = interaction;
         const sub = options.getSubcommand();
-        var data = await logchannelModel.find({ Guild: interaction.guild.id});
+        var data = await filteringlogchannelModel.find({ Guild: interaction.guild.id});
 
         async function sendMessage (message) {
             const embed = new EmbedBuilder()
@@ -50,7 +50,7 @@ module.exports = {
                 if (check) {
                     return await sendMessage(`⚠️ Looks like that is already the log channel!`);
                 } else {
-                    await logchannelModel.create({
+                    await filteringlogchannelModel.create({
                         Guild: interaction.guild.id,
                         Channel: logchannel.id,
                     });
@@ -62,14 +62,14 @@ module.exports = {
                
             
                 
-                var data = await logchannelModel.findOne({ Guild: interaction.guild.id});
+                var data = await filteringlogchannelModel.findOne({ Guild: interaction.guild.id});
             
                 if (!data) {
                    
                     return await sendMessage(`⚠️ Looks like there is no log channel configuration for this guild in the database, so I can't remove it!`);
                 } else {
                   
-                    await logchannelModel.deleteOne({ Guild: interaction.guild.id});
+                    await filteringlogchannelModel.deleteOne({ Guild: interaction.guild.id});
                     return await sendMessage(`The log channel has been successfully removed from the database!`);
                 }
             break;
