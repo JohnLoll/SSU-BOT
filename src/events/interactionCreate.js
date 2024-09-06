@@ -45,7 +45,7 @@ module.exports = {
               // Fetch the guild member to get the nickname
               var guild = await client.guilds.fetch('1069439785984344096');
               var guildMember = await guild.members.fetch(stringId);
-             
+              await interaction.message.delete().catch(err => {});
       
               
             
@@ -242,7 +242,7 @@ module.exports = {
                       await logChannel.send({ embeds: [logEmbed] });
                     }
                  await interaction.reply({ content: `🌍 I have notified the member that their guard log is approved.`, ephemeral: true });
-              await interaction.message.delete().catch(err => {});
+             
                 
               }
       
