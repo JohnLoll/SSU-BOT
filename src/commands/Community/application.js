@@ -129,7 +129,6 @@ module.exports = {
       option
         .setName('question-11')
         .setDescription('Choose the eleventh question for the application.')
-        .setRequired(true)
         .setMaxLength(500)
       )
      
