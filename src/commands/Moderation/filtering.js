@@ -4,16 +4,7 @@ const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const axios = require('axios');
 const NodeCache = require('node-cache'); // Use a cache system
 const { filteringlogchannelModel } = require('../../Schemas/filteringlogchannel');
-var logdata = filteringlogchannelModel.find({ Guild: interaction.guild.id});
-let logchannel = null;
-                  var logvalues = [];
-                  await logdata.forEach(async value => {
-                      if (!value.Channel) return;
-                      else {
-                         
-                          logvalues.push(logchannel = value.Channel);
-                      }
-                  });
+
 const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); // Cache for 1 hour
 let premiumStatus;
 // Exponential backoff for rate-limited retries
@@ -319,7 +310,16 @@ module.exports = {
                 )),
     
     async execute(interaction) {
-        
+        var logdata = await filteringlogchannelModel.find({ Guild: interaction.guild.id});
+let logchannel = null;
+                  var logvalues = [];
+                  await logdata.forEach(async value => {
+                      if (!value.Channel) return;
+                      else {
+                         
+                          logvalues.push(logchannel = value.Channel);
+                      }
+                  });
         await interaction.reply({ content: 'Please wait while your data is being proccesed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
         const robloxUsername = interaction.options.getString('roblox_username');
         const robloxProfile = interaction.options.getString('roblox_profile');
