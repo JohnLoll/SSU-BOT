@@ -65,29 +65,41 @@ module.exports = {
       
         amountToAdd = 0;
         amountToRemove = 0;
-    
-        const mentionedUsersString = interaction.options.getString('user');
-        const mentionedUsers = mentionedUsersString.match(/(\d+)/g); 
-        
-        function getNicknameWithoutTimezone(user) {
-          const nickname = user.nickname || user.user.username;
-          return nickname.replace(/\s*\[.*\]\s*$/, ''); 
-          }
-          reason = interaction.options.getString('reason');
-          const action = interaction.options.getString('action');
-          for (const mentionedUserId of mentionedUsers) {
-            amount = interaction.options.getInteger('amount');
-            console.log(`Processing mentioned user ID: ${mentionedUserId}`);
-            let officerNickname = null;
-            try {
-              const officer = interaction.guild.members.cache.get(mentionedUserId); 
-              officerNickname = getNicknameWithoutTimezone(officer);
-              await modifyEPAndSendDM(officer.user, action === 'Add' ? amount : amount, reason, action.toLowerCase());
-              console.log(`Officer nickname: ${officerNickname}`);
-            } catch (error) {
 
-              console.error(`Error getting officer nickname: ${error}`);
-            }
+const mentionedUsersString = interaction.options.getString('user');
+const mentionedUsers = mentionedUsersString.match(/<@!?(\d+)>/g)?.map(mention => mention.match(/\d+/)[0]) || [];
+
+function getNicknameWithoutTimezone(user) {
+    const nickname = user.nickname || user.user.username;
+    return nickname.replace(/\s*\[.*\]\s*$/, ''); // Remove the timezone information
+}
+
+reason = interaction.options.getString('reason');
+const action = interaction.options.getString('action');
+ amount = interaction.options.getInteger('amount');
+
+for (const mentionedUserId of mentionedUsers) {
+    console.log(`Processing mentioned user ID: ${mentionedUserId}`);
+    
+    let officerNickname = null;
+    try {
+        const officer = interaction.guild.members.cache.get(mentionedUserId);
+      
+        if (!officer) {
+            console.error(`Member with ID ${mentionedUserId} not found.`);
+            continue; 
+        }
+
+        officerNickname = getNicknameWithoutTimezone(officer);
+        console.log(`Officer nickname: ${officerNickname}`);
+
+      
+        await modifyEPAndSendDM(officer.user, action === 'Add' ? amount : -amount, reason, action.toLowerCase());
+        
+    } catch (error) {
+        console.error(`Error getting officer nickname: ${error}`);
+    }
+
             async function modifyEPAndSendDM(user, amount, reason, operation) {
               try {
 

@@ -89,7 +89,7 @@ module.exports = {
                 if (!channel) {
                   const errorEmbed = new EmbedBuilder()
                   .setTitle('Error')
-                  .setDescription(`The specified channel does not exist.`)
+                  .setDescription(`The specified event logs channel does not exist.`)
                   .setColor(0xff0000);
                    interaction.editReply({ embeds: [errorEmbed] });
                   return;
@@ -205,7 +205,7 @@ module.exports = {
               console.error('Error fetching messages:', err);
               const errorEmbed = new EmbedBuilder()
               .setTitle('Error')
-              .setDescription(`An error occurred while fetching messages from the channel.`)
+              .setDescription(`An error occurred while fetching messages from the event logs channel.`)
               .setColor(0xff0000);
                interaction.editReply({ embeds: [errorEmbed] });
               return;
@@ -240,7 +240,7 @@ module.exports = {
       console.error('Error fetching data from Google Sheets:', err);
       const errorEmbed = new EmbedBuilder()
                     .setTitle('Error')
-                    .setDescription(`An error occurred while fetching EP data from Google Sheets.`)
+                    .setDescription(`User not found in the EP sheet`)
                     .setColor(0xff0000);
                      await interaction.editReply({ embeds: [errorEmbed] });
       return;
