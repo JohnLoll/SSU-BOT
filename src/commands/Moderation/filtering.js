@@ -310,6 +310,7 @@ module.exports = {
                 )),
     
     async execute(interaction) {
+        await interaction.reply({ content: 'Please wait while your data is being proccesed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
         var logdata = await filteringlogchannelModel.find({ Guild: interaction.guild.id});
 let logchannel = null;
                   var logvalues = [];
@@ -320,7 +321,7 @@ let logchannel = null;
                           logvalues.push(logchannel = value.Channel);
                       }
                   });
-        await interaction.reply({ content: 'Please wait while your data is being proccesed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
+    
         const robloxUsername = interaction.options.getString('roblox_username');
         const robloxProfile = interaction.options.getString('roblox_profile');
         const tryoutHost = interaction.options.getString('tryout_host');
