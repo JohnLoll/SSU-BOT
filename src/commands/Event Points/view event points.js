@@ -24,7 +24,7 @@ module.exports = {
         let officerNickname = officer.nickname || officer.user.username;
 
         // Remove the timezone information from the nickname
-        officerNickname = officerNickname.replace(/\s*\[.*\]\s*$/, '');
+        officerNickname = officerNickname.replace(/\s*\|.*$/, '');
 
         console.log('Command started');
         console.log('Calling Google Sheets API');

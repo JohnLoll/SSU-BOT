@@ -66,33 +66,34 @@ module.exports = {
         amountToAdd = 0;
         amountToRemove = 0;
 
-const mentionedUsersString = interaction.options.getString('user');
-const mentionedUsers = mentionedUsersString.match(/<@!?(\d+)>/g)?.map(mention => mention.match(/\d+/)[0]) || [];
-
-function getNicknameWithoutTimezone(user) {
-    const nickname = user.nickname || user.user.username;
-    return nickname.replace(/\s*\[.*\]\s*$/, ''); // Remove the timezone information
-}
-
-reason = interaction.options.getString('reason');
-const action = interaction.options.getString('action');
- amount = interaction.options.getInteger('amount');
-
-for (const mentionedUserId of mentionedUsers) {
-    console.log(`Processing mentioned user ID: ${mentionedUserId}`);
-    
-    let officerNickname = null;
-    try {
-        const officer = interaction.guild.members.cache.get(mentionedUserId);
-      
-        if (!officer) {
-            console.error(`Member with ID ${mentionedUserId} not found.`);
-            continue; 
-        }
-
-        officerNickname = getNicknameWithoutTimezone(officer);
-        console.log(`Officer nickname: ${officerNickname}`);
-
+        const mentionedUsersString = interaction.options.getString('user');
+        const mentionedUsers = mentionedUsersString.match(/<@!?(\d+)>/g)?.map(mention => mention.match(/\d+/)[0]) || [];
+        let officer = null;
+        // Function to remove timezone information from the user's nickname
+        function getNicknameWithoutTimezone(user) {
+          const nickname = user.nickname || user.user.username;
+          return nickname.replace(/\s*\|.*$/, ''); // Remove everything including "|" and to the right of it
+      }
+        
+        reason = interaction.options.getString('reason');
+        const action = interaction.options.getString('action');
+         amount = interaction.options.getInteger('amount');
+        
+        for (const mentionedUserId of mentionedUsers) {
+            console.log(`Processing mentioned user ID: ${mentionedUserId}`);
+            
+            let officerNickname = null;
+            try {
+                 officer = interaction.guild.members.cache.get(mentionedUserId);
+                
+                // Check if the officer was found
+                if (!officer) {
+                    console.error(`Member with ID ${mentionedUserId} not found.`);
+                    continue; // Skip to the next user if this one is not found
+                }
+        
+                officerNickname = getNicknameWithoutTimezone(officer);
+                console.log(`Officer nickname: ${officerNickname}`);
       
         await modifyEPAndSendDM(officer.user, action === 'Add' ? amount : -amount, reason, action.toLowerCase());
         
@@ -159,8 +160,8 @@ for (const mentionedUserId of mentionedUsers) {
                         const currentNickname = row[columnIndex];
             
                         if (currentNickname) {
-                        const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
-                        const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+                        const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '')
+                        const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
             
                         if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                           const weeklyPointsColumn = columnIndex + Weeklyoffset;
@@ -257,8 +258,8 @@ for (const mentionedUserId of mentionedUsers) {
                         const currentNickname = row[columnIndex];
             
                         if (currentNickname) {
-                        const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
-                        const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+                        const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '')
+                        const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
             
                         if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                           const weeklyPointsColumn = columnIndex + Weeklyoffset;

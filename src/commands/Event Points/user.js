@@ -48,15 +48,15 @@ module.exports = {
                   });
                   function getNicknameWithoutTimezone(user) {
                     const nickname = user.nickname || user.user.username;
-                    return nickname.replace(/\s*\[.*\]\s*$/, ''); // Remove the timezone information from the nickname
-                    }
+                    return nickname.replace(/\s*\|.*$/, ''); // Remove everything including "|" and to the right of it
+                }
                 const action = interaction.options.getString('action');
                 const mentionedUsersString = interaction.options.getString('user');
                 const mentionedUsers = mentionedUsersString.match(/(\d+)/g); 
                 for (const mentionedUserId of mentionedUsers) {
                   console.log(`Processing mentioned user ID: ${mentionedUserId}`);
                   try {
-                    const officer = interaction.guild.members.cache.get(mentionedUserId); 
+                    const officer = interaction.guild.members.cache.get(mentionedUserId); // No need to trim, as IDs don't have leading/trailing spaces
                     officerNickname = getNicknameWithoutTimezone(officer);
                     console.log(`Officer nickname: ${officerNickname}`);
                 } catch (error) {
@@ -237,8 +237,8 @@ module.exports = {
                           const currentNickname = row[columnIndex];
               
                           if (currentNickname) {
-                            const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
-                            const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+                            const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '');
+                            const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
               
                             if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                               const weeklyPointsColumn = columnIndex + Weeklyoffset;

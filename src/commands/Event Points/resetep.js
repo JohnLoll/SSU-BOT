@@ -76,7 +76,7 @@ module.exports = {
 
                     if (currentNickname) {
                        
-                        const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
+                        const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '');
 
                         if (cleanedCurrentNickname.length > 0) {
                           

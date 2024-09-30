@@ -37,7 +37,7 @@ module.exports = {
     await interaction.deferReply();
     const officer = interaction.guild.members.cache.get(targetUser.id);
     const officerNickname = officer.nickname || officer.user.username;
-    const officerNicknameWithoutTimezone = officerNickname.replace(/\s*\[.*\]\s*$/, '');
+    const officerNicknameWithoutTimezone = officerNickname.replace(/\s*\|.*$/, '');
 
     const auth = new google.auth.GoogleAuth({
       keyFile: 'credentials.json', // Use your credentials file
@@ -61,7 +61,7 @@ module.exports = {
           const row = values[rIndex];
           for (let cIndex = 0; cIndex < row.length; cIndex++) {
             const currentNickname = row[cIndex];
-            const currentNicknameWithoutTimezone = currentNickname.replace(/\s*\[.*\]\s*$/, '');
+            const currentNicknameWithoutTimezone = currentNickname.replace(/\s*\|.*$/, '');
             if (currentNicknameWithoutTimezone) {
               const cleanedCurrentNickname = currentNicknameWithoutTimezone.trim();
               const officerNicknameLower = officerNicknameWithoutTimezone.trim().toLowerCase();
