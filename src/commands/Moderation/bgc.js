@@ -233,30 +233,33 @@ const assessAccount = (accountDetails, metrics) => {
 
     const ageFactor = accountAge > 2000 ? 0.10 : 0.20;
 
-    if (clothingCount < expectedClothing * 0.30) score += 4; 
-    else if (clothingCount < expectedClothing * 0.50) score += 3;
+    // Stricter scoring conditions
+    if (clothingCount < expectedClothing * 0.25) score += 5;  // Stricter threshold
+    else if (clothingCount < expectedClothing * 0.40) score += 4;  // Stricter threshold
 
-    if (accessoryCount < expectedAccessories * 0.30) score += 3; 
-    else if (accessoryCount < expectedAccessories * 0.50) score += 2;
+    if (accessoryCount < expectedAccessories * 0.25) score += 4;  // Stricter threshold
+    else if (accessoryCount < expectedAccessories * 0.40) score += 3;  // Stricter threshold
 
-    if (gamepassCount < expectedGamePasses * 0.30) score += 3; 
-    else if (gamepassCount < expectedGamePasses * 0.50) score += 2;
+    if (gamepassCount < expectedGamePasses * 0.25) score += 4;  // Stricter threshold
+    else if (gamepassCount < expectedGamePasses * 0.40) score += 3;  // Stricter threshold
 
-    if (badgeCount < expectedBadges * ageFactor) score += 4; 
-    else if (badgeCount < expectedBadges * 0.60) score += 3;
+    if (badgeCount < expectedBadges * ageFactor * 0.70) score += 5;  // Stricter threshold
+    else if (badgeCount < expectedBadges * 0.50) score += 4;  // Stricter threshold
 
-    if (groupCount < expectedGroups * ageFactor) score += 3; 
-    else if (groupCount < expectedGroups * 0.60) score += 2;
+    if (groupCount < expectedGroups * ageFactor * 0.70) score += 4;  // Stricter threshold
+    else if (groupCount < expectedGroups * 0.50) score += 3;  // Stricter threshold
 
-  
-    if (clothingCount > expectedClothing * 1.5) score -= 2;
-    if (accessoryCount > expectedAccessories * 1.5) score -= 1;
-    if (gamepassCount > expectedGamePasses * 1.5) score -= 2;
-    if (badgeCount > expectedBadges * 1.5) score -= 3;
-    if (groupCount > expectedGroups * 1.5) score -= 1;
+    // Increased penalties for excessive amounts
+    if (clothingCount > expectedClothing * 1.5) score -= 4;  // Increased penalty
+    if (accessoryCount > expectedAccessories * 1.5) score -= 3;  // Increased penalty
+    if (gamepassCount > expectedGamePasses * 1.5) score -= 4;  // Increased penalty
+    if (badgeCount > expectedBadges * 1.5) score -= 5;  // Increased penalty
+    if (groupCount > expectedGroups * 1.5) score -= 3;  // Increased penalty
 
     return score;
 };
+
+
 
 
 
