@@ -1,35 +1,36 @@
-
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder, PermissionsBitField } = require('discord.js');
 const axios = require('axios');
-const NodeCache = require('node-cache'); // Use a cache system
+const NodeCache = require('node-cache');
 const { filteringlogchannelModel } = require('../../Schemas/filteringlogchannel');
+const noblox = require('noblox.js');
 
-const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 }); // Cache for 1 hour
+const inventoryCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 let premiumStatus;
-// Exponential backoff for rate-limited retries
-const checkInventoryVisibility = async (userId) => {
-    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-    const maxRetries = 20;
-    let attempt = 0;
-    let delayTime = 5000; // Start with a 5-second delay
 
-    const cachedInventory = inventoryCache.get(userId); // Check if we already have the result cached
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const checkInventoryVisibility = async (userId) => {
+    const cachedInventory = inventoryCache.get(userId);
     if (cachedInventory !== undefined) {
         return cachedInventory;
     }
+
+    const maxRetries = 20;
+    let attempt = 0;
+    let delayTime = 5000;
 
     while (attempt < maxRetries) {
         try {
             const response = await axios.get(`https://inventory.roblox.com/v1/users/${userId}/can-view-inventory`);
             const canView = response.data.canView;
-            inventoryCache.set(userId, canView); // Cache the result
+            inventoryCache.set(userId, canView);
             return canView;
         } catch (error) {
-            if (error.response && error.response.status === 429) { // Rate limit error
+            if (error.response && error.response.status === 429) {
                 console.log(`Rate limit exceeded. Retrying in ${delayTime / 1000} seconds... Attempt ${attempt + 1}`);
-                await delay(delayTime); // Exponential backoff
-                delayTime *= 2; // Double the delay each time
+                await delay(delayTime);
+                delayTime *= 2;
                 attempt++;
             } else {
                 console.error(`Error checking inventory visibility for userId ${userId}:`, error.response ? error.response.data : error.message);
@@ -41,11 +42,11 @@ const checkInventoryVisibility = async (userId) => {
     throw new Error('Max retries reached while checking inventory visibility');
 };
 
-// Fetch inventory details with improved retry and rate limit handling
 const fetchInventory = async (assetTypeId, userId) => {
     let totalCount = 0;
     let nextPageCursor = null;
-    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const badgeCreators = {};
+    let robloxAccessoryCount = 0;
 
     const makeRequest = async (url, params) => {
         try {
@@ -54,16 +55,13 @@ const fetchInventory = async (assetTypeId, userId) => {
         } catch (error) {
             if (error.response && error.response.status === 429) {
                 console.log('Rate limit exceeded. Retrying...');
-                await delay(5000); // Wait for 5 seconds before retrying
-                return makeRequest(url, params); 
+                await delay(5000);
+                return makeRequest(url, params);
             } else {
                 throw error;
             }
         }
     };
-
-    const badgeCreators = {};
-    let robloxAccessoryCount = 0;
 
     do {
         const response = await makeRequest('https://www.roblox.com/users/inventory/list-json', {
@@ -74,10 +72,10 @@ const fetchInventory = async (assetTypeId, userId) => {
 
         const items = response.Data?.Items || [];
 
-        if (assetTypeId === 34) { // Gamepasses
+        if (assetTypeId === 34) {
             const filteredItems = items.filter(item => item.Creator && item.Creator.Id !== userId);
             totalCount += filteredItems.length;
-        } else if (assetTypeId === 21) { // Badges
+        } else if (assetTypeId === 21) {
             items.forEach(item => {
                 const creatorId = item.Creator?.Id;
                 if (creatorId) {
@@ -92,7 +90,7 @@ const fetchInventory = async (assetTypeId, userId) => {
             });
         } else {
             items.forEach(item => {
-                if (item.Creator?.Id === 1) { // Roblox-made items have Creator.Id of 1
+                if (item.Creator?.Id === 1) {
                     robloxAccessoryCount++;
                 } else {
                     totalCount++;
@@ -104,7 +102,7 @@ const fetchInventory = async (assetTypeId, userId) => {
     } while (nextPageCursor);
 
     if (assetTypeId === 8 && robloxAccessoryCount > 5) {
-        totalCount += 5; // Cap Roblox accessories at 5
+        totalCount += 5;
     } else {
         totalCount += robloxAccessoryCount;
     }
@@ -112,69 +110,6 @@ const fetchInventory = async (assetTypeId, userId) => {
     return totalCount;
 };
 
-
-
-
-
-  
-  
-  
-const GAR_BADGE_ID = 2124527902;
-
-async function findGarBadgePage(userId) {
-    let cursor = '';
-    let foundGarBadge = false;
-    let garBadgePage = 1;
-    let firstBadgePage = null;
-    let badgeCount = 0;
-
-    try {
-        while (!foundGarBadge) {
-            const response = await fetch(`https://badges.roblox.com/v1/users/${userId}/badges?limit=100&cursor=${cursor}&sortOrder=Asc`);
-            const data = await response.json();
-
-            if (data.data.length === 0) {
-                break; 
-            }
-
-            
-            if (firstBadgePage === null) {
-                firstBadgePage = Math.floor(badgeCount / 30) + 1;
-            }
-
-          
-            for (let i = 0; i < data.data.length; i++) {
-                if (data.data[i].id === GAR_BADGE_ID) {
-                    foundGarBadge = true;
-                    garBadgePage = Math.floor((badgeCount + i) / 30) + 1; 
-                    break;
-                }
-            }
-
-            badgeCount += data.data.length; 
-            cursor = data.nextPageCursor || ''; 
-            if (!data.nextPageCursor) {
-                break; 
-            }
-        }
-
-        if (!foundGarBadge) {
-            return { found: false, pageNumber: null, message: 'Not Found.' };
-        }
-
-   
-
-        return {
-            found: true,
-            pageNumber: garBadgePage,
-            message: `Page: ${garBadgePage}`
-        };
-
-    } catch (error) {
-        console.error('Error fetching badge data:', error);
-        return { found: false, pageNumber: null, message: 'There was an error fetching the badge data.' };
-    }
-}
 
 
 const calculateExpectedValues = (accountAge) => {
@@ -187,95 +122,39 @@ const calculateExpectedValues = (accountAge) => {
     };
 };
 
-/*
-const assessAccount = (accountDetails, metrics, garBadgePage) => {
-    const { accountAge, clothingCount, accessoryCount, gamepassCount, badgeCount, groupCount } = metrics;
-    const { expectedClothing, expectedAccessories, expectedGamePasses, expectedBadges, expectedGroups } = calculateExpectedValues(accountAge);
-
-    let score = 0;
-
- 
-    const ageFactor = accountAge > 2000 ? 0.10 : 0.20;
-
- 
-    if (clothingCount < expectedClothing * 0.30) score += 4; 
-    else if (clothingCount < expectedClothing * 0.50) score += 3;
-
-    if (accessoryCount < expectedAccessories * 0.30) score += 3; 
-    else if (accessoryCount < expectedAccessories * 0.50) score += 2;
-
-    if (gamepassCount < expectedGamePasses * 0.30) score += 3; 
-    else if (gamepassCount < expectedGamePasses * 0.50) score += 2;
-
-    if (badgeCount < expectedBadges * ageFactor) score += 4; 
-    else if (badgeCount < expectedBadges * 0.60) score += 3;
-
-    if (groupCount < expectedGroups * ageFactor) score += 3; 
-    else if (groupCount < expectedGroups * 0.60) score += 2;
-
- 
-    if (clothingCount > expectedClothing * 1.5) score -= 2;
-    if (accessoryCount > expectedAccessories * 1.5) score -= 1;
-    if (gamepassCount > expectedGamePasses * 1.5) score -= 2;
-    if (badgeCount > expectedBadges * 1.5) score -= 3;
-    if (groupCount > expectedGroups * 1.5) score -= 1;
-
-    // Higher score if the Gar Badge is on the first page
-    if (garBadgePage === 1) score += 5; 
-
-    return score;
-};
-
-*/
 const assessAccount = (accountDetails, metrics) => {
     const { accountAge, clothingCount, accessoryCount, gamepassCount, badgeCount, groupCount } = metrics;
     const { expectedClothing, expectedAccessories, expectedGamePasses, expectedBadges, expectedGroups } = calculateExpectedValues(accountAge);
 
     let score = 0;
 
-    
     const ageFactor = accountAge > 2000 ? 0.10 : 0.20;
 
+    // Stricter scoring conditions
+    if (clothingCount < expectedClothing * 0.25) score += 5;  // Stricter threshold
+    else if (clothingCount < expectedClothing * 0.40) score += 4;  // Stricter threshold
 
-    if (clothingCount < expectedClothing * 0.30) score += 4; 
-    else if (clothingCount < expectedClothing * 0.50) score += 3;
+    if (accessoryCount < expectedAccessories * 0.25) score += 4;  // Stricter threshold
+    else if (accessoryCount < expectedAccessories * 0.40) score += 3;  // Stricter threshold
 
-    if (accessoryCount < expectedAccessories * 0.30) score += 3; 
-    else if (accessoryCount < expectedAccessories * 0.50) score += 2;
+    if (gamepassCount < expectedGamePasses * 0.25) score += 4;  // Stricter threshold
+    else if (gamepassCount < expectedGamePasses * 0.40) score += 3;  // Stricter threshold
 
-    if (gamepassCount < expectedGamePasses * 0.30) score += 3; 
-    else if (gamepassCount < expectedGamePasses * 0.50) score += 2;
+    if (badgeCount < expectedBadges * ageFactor * 0.70) score += 5;  // Stricter threshold
+    else if (badgeCount < expectedBadges * 0.50) score += 4;  // Stricter threshold
 
-    if (badgeCount < expectedBadges * ageFactor) score += 4; 
-    else if (badgeCount < expectedBadges * 0.60) score += 3;
+    if (groupCount < expectedGroups * ageFactor * 0.70) score += 4;  // Stricter threshold
+    else if (groupCount < expectedGroups * 0.50) score += 3;  // Stricter threshold
 
-    if (groupCount < expectedGroups * ageFactor) score += 3; 
-    else if (groupCount < expectedGroups * 0.60) score += 2;
-
-  
-    if (clothingCount > expectedClothing * 1.5) score -= 2;
-    if (accessoryCount > expectedAccessories * 1.5) score -= 1;
-    if (gamepassCount > expectedGamePasses * 1.5) score -= 2;
-    if (badgeCount > expectedBadges * 1.5) score -= 3;
-    if (groupCount > expectedGroups * 1.5) score -= 1;
+    // Increased penalties for excessive amounts
+    if (clothingCount > expectedClothing * 1.5) score -= 4;  // Increased penalty
+    if (accessoryCount > expectedAccessories * 1.5) score -= 3;  // Increased penalty
+    if (gamepassCount > expectedGamePasses * 1.5) score -= 4;  // Increased penalty
+    if (badgeCount > expectedBadges * 1.5) score -= 5;  // Increased penalty
+    if (groupCount > expectedGroups * 1.5) score -= 3;  // Increased penalty
 
     return score;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 const categorizeAlt = (score) => {
@@ -308,20 +187,17 @@ module.exports = {
                     { name: 'Yes', value: 'yes' },
                     { name: 'No', value: 'no' }
                 )),
-    
+
     async execute(interaction) {
-        await interaction.reply({ content: 'Please wait while your data is being proccesed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
-        var logdata = await filteringlogchannelModel.find({ Guild: interaction.guild.id});
-let logchannel = null;
-                  var logvalues = [];
-                  await logdata.forEach(async value => {
-                      if (!value.Channel) return;
-                      else {
-                         
-                          logvalues.push(logchannel = value.Channel);
-                      }
-                  });
-    
+        await interaction.reply({ content: 'Please wait while your data is being processed, this may take up to **five** minutes. If you are having issues, please contact <@721500712973893654>', ephemeral: true });
+        
+        const logdata = await filteringlogchannelModel.find({ Guild: interaction.guild.id });
+        let logchannel = null;
+        const logvalues = logdata.map(value => value.Channel).filter(Boolean);
+        if (logvalues.length > 0) {
+            logchannel = logvalues[0];
+        }
+
         const robloxUsername = interaction.options.getString('roblox_username');
         const robloxProfile = interaction.options.getString('roblox_profile');
         const tryoutHost = interaction.options.getString('tryout_host');
@@ -360,98 +236,67 @@ let logchannel = null;
             return;
         }
 
-        
         console.log('Fetching target channel...');
-     
-        
-        
-           
-           
-        
-         
-        
-            //console.log(`Checking userId: ${userId}`);
-        /*
-            if (exemptedUserIds.includes(userId)) {
-                //console.log(`User ${userId} is exempt`);
-                const exemptEmbed = new EmbedBuilder()
-                    .setColor('#00ff00') // Green
-                    .setTitle('User Exempt')
-                    .setDescription('This user is exempt from the alternate account detection.')
-                    .setTimestamp()
-                    .setFooter({ text: 'Points Tracker' });
-                return await interaction.editReply({ embeds: [exemptEmbed] });
-            }*/
-                const noblox = require('noblox.js');
-                const info = await noblox.getPlayerInfo(userId);
-            const canViewInventory = await checkInventoryVisibility(userId);
-            if (!canViewInventory) {
-                const privateEmbed = new EmbedBuilder()
-                    .setColor('#ffcc00')
-                    .setTitle('Inventory Private')
-                    .setDescription('Your roblox inventory is set to private. Please change this to public and try again.')
-                    .setTimestamp()
-                    .setFooter({ text: 'Points Tracker' });
-                return await interaction.followUp({ embeds: [privateEmbed] });
-            }
-            //const { found, pageNumber, message } = await findGarBadgePage(userId);
-            const accountResponse = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
-            
-           
-            const accountDetails = accountResponse.data;
-            const accountCreatedDate = new Date(accountDetails.created);
-            const accountAge = Math.floor((Date.now() - accountCreatedDate) / (1000 * 60 * 60 * 24));
 
-            const [shirtCount, pantsCount, accessoryCount, gamepassCount, badgeCount, groupResponse] = await Promise.all([
-                fetchInventory(11, userId), // Fetch Shirts
-                fetchInventory(12, userId), // Fetch Pants
-                fetchInventory(8, userId),  // Fetch Accessories
-                fetchInventory(34, userId), // Fetch Gamepasses
-                fetchInventory(21, userId), // Fetch Badges
-                axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`)
-            ]);
-            
-            const clothingCount = shirtCount + pantsCount; // Sum shirts and pants to get total clothing count
+        const info = await noblox.getPlayerInfo(userId);
+        const canViewInventory = await checkInventoryVisibility(userId);
+        if (!canViewInventory) {
+            const privateEmbed = new EmbedBuilder()
+                .setColor('#ffcc00')
+                .setTitle('Inventory Private')
+                .setDescription('Your roblox inventory is set to private. Please change this to public and try again.')
+                .setTimestamp()
+                .setFooter({ text: 'Points Tracker' });
+            return await interaction.followUp({ embeds: [privateEmbed] });
+        }
 
-            const groupCount = groupResponse.data.data.length;
+        const [accountResponse, shirtCount, pantsCount, accessoryCount, gamepassCount, badgeCount, groupResponse, friendsResponse, followingResponse] = await Promise.all([
+            axios.get(`https://users.roblox.com/v1/users/${userId}`),
+            fetchInventory(11, userId),
+            fetchInventory(12, userId),
+            fetchInventory(8, userId),
+            fetchInventory(34, userId),
+            fetchInventory(21, userId),
+            axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`),
+            axios.get(`https://friends.roblox.com/v1/users/${userId}/friends/count`),
+            axios.get(`https://friends.roblox.com/v1/users/${userId}/followings/count`)
+        ]);
 
-            const [friendsResponse, followingResponse] = await Promise.all([
-                axios.get(`https://friends.roblox.com/v1/users/${userId}/friends/count`),
-                axios.get(`https://friends.roblox.com/v1/users/${userId}/followings/count`)
-            ]);
+        const accountDetails = accountResponse.data;
+        const accountCreatedDate = new Date(accountDetails.created);
+        const accountAge = Math.floor((Date.now() - accountCreatedDate) / (1000 * 60 * 60 * 24));
 
-            const friendsCount = friendsResponse.data.count;
-            const followingCount = followingResponse.data.count;
+        const clothingCount = shirtCount + pantsCount;
+        const groupCount = groupResponse.data.data.length;
+        const friendsCount = friendsResponse.data.count;
+        const followingCount = followingResponse.data.count;
 
-            const metrics = {
-                accountAge,
-                clothingCount,
-                accessoryCount,
-                gamepassCount,
-                badgeCount,
-                groupCount 
-            };
+        const metrics = {
+            accountAge,
+            clothingCount,
+            accessoryCount,
+            gamepassCount,
+            badgeCount,
+            groupCount
+        };
 
-            //const score = assessAccount(accountDetails, metrics, pageNumber);
-            const score = assessAccount(accountDetails, metrics);
-            const altCategory = categorizeAlt(score);
+        const score = assessAccount(accountDetails, metrics);
+        const altCategory = categorizeAlt(score);
 
-            let embedColor;
-            if (altCategory === 'High') {
-                embedColor = '#FF0000'; // Red
-            } else if (altCategory === 'Medium') {
-                embedColor = '#FFA500'; // Orange
-            } else {
-                embedColor = '#00FF00'; // Green
-            }
-           
-        const targetChannelId = logchannel; 
+        let embedColor;
+        if (altCategory === 'High') {
+            embedColor = '#FF0000';
+        } else if (altCategory === 'Medium') {
+            embedColor = '#FFA500';
+        } else {
+            embedColor = '#00FF00';
+        }
+
+        const targetChannelId = logchannel;
         const targetChannel = interaction.client.channels.cache.get(targetChannelId);
 
-        
         if (!targetChannel) {
             console.error('Target channel not found. Check if the channel ID is correct and if the bot has access to the channel.');
-            //await interaction.editReply({ content: 'Failed to send the embed. Please check the bot permissions or channel ID and try again later.', ephemeral: true });
             return;
         }
 
@@ -470,7 +315,7 @@ let logchannel = null;
                 { name: 'Roblox Profile', value: `[View Profile](https://www.roblox.com/users/${userId}/profile)`, inline: true },
                 { name: 'Tryout Host', value: tryoutHost, inline: true },
                 { name: 'Ban Status', value: info.isBanned ? "True" : "False", inline: true },
-                //{ name: 'Gar Welcome Badge', value: message, inline: true },
+              
                  
             )
             
