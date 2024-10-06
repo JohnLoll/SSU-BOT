@@ -175,7 +175,7 @@ module.exports = {
             option.setName('roblox_profile')
                 .setDescription('Link to your Roblox profile')
                 .setRequired(true))
-        .addStringOption(option =>
+        .addUserOption(option =>
             option.setName('tryout_host')
                 .setDescription('The person who hosted the tryout')
                 .setRequired(true))
@@ -200,7 +200,7 @@ module.exports = {
 
         const robloxUsername = interaction.options.getString('roblox_username');
         const robloxProfile = interaction.options.getString('roblox_profile');
-        const tryoutHost = interaction.options.getString('tryout_host');
+        const tryoutHost = interaction.options.getMember('tryout_host');
         const groupPending = interaction.options.getString('group_pending');
 
         const profileIdMatch = robloxProfile.match(/\/users\/(\d+)\//);
@@ -313,7 +313,7 @@ module.exports = {
                 { name: 'Following List Count', value: `${followingCount}`, inline: true },
                 { name: 'Alt Account Likelihood', value: `${altCategory}`, inline: true },
                 { name: 'Roblox Profile', value: `[View Profile](https://www.roblox.com/users/${userId}/profile)`, inline: true },
-                { name: 'Tryout Host', value: tryoutHost, inline: true },
+                { name: 'Tryout Host', value: `<@${tryoutHost.id}>`, inline: true },
                 { name: 'Ban Status', value: info.isBanned ? "True" : "False", inline: true },
               
                  
