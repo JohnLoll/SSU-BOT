@@ -48,8 +48,9 @@ module.exports = {
                   });
                   function getNicknameWithoutTimezone(user) {
                     const nickname = user.nickname || user.user.username;
-                    return nickname.replace(/\s*\|.*$/, ''); // Remove everything including "|" and to the right of it
+                    return nickname.replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '');
                 }
+                
                 const action = interaction.options.getString('action');
                 const mentionedUsersString = interaction.options.getString('user');
                 const mentionedUsers = mentionedUsersString.match(/(\d+)/g); 
@@ -237,8 +238,8 @@ module.exports = {
                           const currentNickname = row[columnIndex];
               
                           if (currentNickname) {
-                            const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '');
-                            const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
+                            const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
+                            const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
               
                             if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                               const weeklyPointsColumn = columnIndex + Weeklyoffset;

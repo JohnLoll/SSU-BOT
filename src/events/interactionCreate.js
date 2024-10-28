@@ -138,8 +138,11 @@ module.exports = {
                           const currentNickname = row[columnIndex];
               
                           if (currentNickname) {
-                          const cleanedCurrentNickname = currentNickname.trim().replace(/[^\w\s]/gi, '');
-                          const officerNicknameLower = officerNickname.trim().replace(/[^\w\s]/gi, '').toLowerCase();
+                            const cleanedCurrentNickname = currentNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '');
+                            const officerNicknameLower = officerNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '').toLowerCase();
+                            
+                            
+                         console.log(officerNicknameLower);
               
                           if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                             const weeklyPointsColumn = columnIndex + Weeklyoffset;
@@ -196,7 +199,7 @@ module.exports = {
                 }
                 console.log(`Added **${amountToAdd}** event points to ${officerNickname}`);
                 //interaction.channel.send(`Added **${amountToAdd}** Event Points to ${officerNickname}`);
-                await member.send(`✅ Your guarding log has been APPROVED. You received ${amountToAdd} Event Points for guarding.`).catch(err => {});
+                await member.send(`✅ Your guarding log has been APPROVED. You received ${amountToAdd} Event Point for guarding.`).catch(err => {});
                 let logchannel = null;
                 const { logchannelModel } = require('../Schemas/logchannel');
                 var logdata = await logchannelModel.find({ Guild: interaction.guild.id });

@@ -74,6 +74,7 @@ module.exports = {
           const nickname = user.nickname || user.user.username;
           return nickname.replace(/\s*\|.*$/, ''); // Remove everything including "|" and to the right of it
       }
+      
         
         reason = interaction.options.getString('reason');
         const action = interaction.options.getString('action');
@@ -160,8 +161,8 @@ module.exports = {
                         const currentNickname = row[columnIndex];
             
                         if (currentNickname) {
-                        const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '')
-                        const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
+                         const cleanedCurrentNickname = currentNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '');
+                          const officerNicknameLower = officerNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '').toLowerCase();
             
                         if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                           const weeklyPointsColumn = columnIndex + Weeklyoffset;
@@ -258,8 +259,8 @@ module.exports = {
                         const currentNickname = row[columnIndex];
             
                         if (currentNickname) {
-                        const cleanedCurrentNickname = currentNickname.trim().replace(/\s*\|.*$/, '')
-                        const officerNicknameLower = officerNickname.trim().replace(/\s*\|.*$/, '').toLowerCase();
+                         const cleanedCurrentNickname = currentNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '');
+                          const officerNicknameLower = officerNickname.trim().replace(/\s*[\|\-\/]\s*.*$/i, '').replace(/\s+[A-Za-z]+$/, '').toLowerCase();
             
                         if (cleanedCurrentNickname.toLowerCase() === officerNicknameLower) {
                           const weeklyPointsColumn = columnIndex + Weeklyoffset;
